@@ -973,6 +973,7 @@ export default class Component extends Model.extend(Styleable) {
       }
     });
     const result = this.components().add(toAppend, opts);
+    console.log('append!!');
     return isArray(result) ? result : [result];
   }
 
@@ -1689,6 +1690,7 @@ export default class Component extends Model.extend(Styleable) {
     const rmOpts = { ...opts };
     [this, em].map(i => i.trigger('component:remove:before', this, remove, rmOpts));
     !rmOpts.abort && remove();
+    console.log('remove!!');
     return this;
   }
 
@@ -1705,6 +1707,7 @@ export default class Component extends Model.extend(Styleable) {
   move(component, opts = {}) {
     this.remove({ temporary: 1 });
     component && component.append(this, opts);
+    console.log('move!!');
     return this;
   }
 
