@@ -307,6 +307,8 @@ export default class EditorModel extends Model {
    * @private
    */
   setSelected(el, opts = {}) {
+    console.trace();
+    console.log('Editor.js => setSelected start');
     const { event } = opts;
     const ctrlKey = event && (event.ctrlKey || event.metaKey);
     const { shiftKey } = event || {};
@@ -383,6 +385,7 @@ export default class EditorModel extends Model {
       this.addSelected(model, opts);
       added = model;
     });
+    console.log('Editor.js => setSelected end');
   }
 
   /**
@@ -392,6 +395,7 @@ export default class EditorModel extends Model {
    * @private
    */
   addSelected(el, opts = {}) {
+    console.log('Editor.js => addSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
 
@@ -402,6 +406,7 @@ export default class EditorModel extends Model {
       selected.addComponent(model, opts);
       model && this.trigger('component:select', model, opts);
     });
+    console.log('Editor.js => addSelected end');
   }
 
   /**
@@ -411,7 +416,9 @@ export default class EditorModel extends Model {
    * @private
    */
   removeSelected(el, opts = {}) {
+    console.log('Editor.js => removeSelected start');
     this.get('selected').removeComponent(getModel(el, $), opts);
+    console.log('Editor.js => removeSelected end');
   }
 
   /**
@@ -421,6 +428,7 @@ export default class EditorModel extends Model {
    * @private
    */
   toggleSelected(el, opts = {}) {
+    console.log('Editor.js => toggleSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
 
@@ -431,6 +439,7 @@ export default class EditorModel extends Model {
         this.addSelected(model, opts);
       }
     });
+    console.log('Editor.js => toggleSelected end');
   }
 
   /**

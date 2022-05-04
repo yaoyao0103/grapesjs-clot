@@ -420,12 +420,14 @@ export default () => {
      * styleManager.addStyleTargets({ color: 'red' });
      */
     addStyleTargets(style, opts) {
+      console.log('style_manager/model/Property.js => addStyleTargets start');
       this.getSelectedAll().map(t => t.addStyle(style, opts));
 
       // Update state rule
       const target = this.getSelected();
       const targetState = this.__getStateTarget();
       target && targetState?.setStyle(target.getStyle(), opts);
+      console.log('style_manager/model/Property.js => addStyleTargets end');
     },
 
     /**

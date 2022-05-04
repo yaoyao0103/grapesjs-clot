@@ -148,7 +148,7 @@ export default class Component extends Model.extend(Styleable) {
     this.initComponents();
     this.initToolbar();
     this.initScriptProps();
-    this.listenTo(this, 'change:script', this.scriptUpdated);
+    this.listenTo(this, 'script', this.scriptUpdated);
     this.listenTo(this, 'change:tagName', this.tagUpdated);
     this.listenTo(this, 'change:attributes', this.attrUpdated);
     this.listenTo(this, 'change:attributes:id', this._idUpdated);
@@ -962,6 +962,7 @@ export default class Component extends Model.extend(Styleable) {
    * someComponent.append(otherComponent, { at: 0 });
    */
   append(components, opts = {}) {
+    console.log('Component.js => append start');
     const compArr = isArray(components) ? components : [components];
     const toAppend = compArr.map(comp => {
       if (isString(comp)) {
@@ -973,7 +974,7 @@ export default class Component extends Model.extend(Styleable) {
       }
     });
     const result = this.components().add(toAppend, opts);
-    console.log('append!!');
+    console.log('Component.js => append end');
     return isArray(result) ? result : [result];
   }
 
@@ -1681,6 +1682,7 @@ export default class Component extends Model.extend(Styleable) {
    * @return {this}
    */
   remove(opts = {}) {
+    console.log('Component.js => remove start');
     const { em } = this;
     const coll = this.collection;
     const remove = () => {
@@ -1690,7 +1692,7 @@ export default class Component extends Model.extend(Styleable) {
     const rmOpts = { ...opts };
     [this, em].map(i => i.trigger('component:remove:before', this, remove, rmOpts));
     !rmOpts.abort && remove();
-    console.log('remove!!');
+    console.log('Component.js => remove end');
     return this;
   }
 
@@ -1705,9 +1707,10 @@ export default class Component extends Model.extend(Styleable) {
    * editor.getSelected().move(dest, { at: 0 });
    */
   move(component, opts = {}) {
+    console.log('Component.js => move start');
     this.remove({ temporary: 1 });
     component && component.append(this, opts);
-    console.log('move!!');
+    console.log('Component.js => move end');
     return this;
   }
 

@@ -39,7 +39,7 @@ export default Backbone.View.extend({
     this.clsField = `${ppfx}field ${ppfx}field-${type}`;
     [
       ['change:value', this.onValueChange],
-      ['remove', this.removeView]
+      ['remove', this.removeView],
     ].forEach(([event, clb]) => {
       model.off(event, clb);
       this.listenTo(model, event, clb);
@@ -57,7 +57,7 @@ export default Backbone.View.extend({
     return {
       component: this.target,
       trait: this.model,
-      elInput: this.getInputElem()
+      elInput: this.getInputElem(),
     };
   },
 
@@ -83,7 +83,7 @@ export default Backbone.View.extend({
     }
     this.onEvent({
       ...this.getClbOpts(),
-      event
+      event,
     });
   },
 
@@ -101,6 +101,7 @@ export default Backbone.View.extend({
    * @private
    */
   onValueChange(model, value, opts = {}) {
+    console.log('trait_manager/view/TraitView.js => onValueChange start');
     if (opts.fromTarget) {
       this.setInputValue(model.get('value'));
       this.postUpdate();
@@ -108,6 +109,7 @@ export default Backbone.View.extend({
       const val = this.getValueForTarget();
       model.setTargetValue(val, opts);
     }
+    console.log('trait_manager/view/TraitView.js => onValueChange end');
   },
 
   /**
@@ -124,7 +126,7 @@ export default Backbone.View.extend({
         this.createLabel({
           label,
           component: target,
-          trait: this
+          trait: this,
         }) || '';
     }
 
@@ -139,10 +141,7 @@ export default Backbone.View.extend({
   getLabel() {
     const { em } = this;
     const { label, name } = this.model.attributes;
-    return (
-      em.t(`traitManager.traits.labels.${name}`) ||
-      capitalize(label || name).replace(/-/g, ' ')
-    );
+    return em.t(`traitManager.traits.labels.${name}`) || capitalize(label || name).replace(/-/g, ' ');
   },
 
   /**
@@ -191,9 +190,7 @@ export default Backbone.View.extend({
 
   getInputElem() {
     const { input, $input } = this;
-    return (
-      input || ($input && $input.get && $input.get(0)) || this.getElInput()
-    );
+    return input || ($input && $input.get && $input.get(0)) || this.getElInput();
   },
 
   getModelValue() {
@@ -227,9 +224,7 @@ export default Backbone.View.extend({
     let tpl = model.el;
 
     if (!tpl) {
-      tpl = this.createInput
-        ? this.createInput(this.getClbOpts())
-        : this.getInputEl();
+      tpl = this.createInput ? this.createInput(this.getClbOpts()) : this.getInputEl();
     }
 
     if (isString(tpl)) {
@@ -282,5 +277,5 @@ export default Backbone.View.extend({
     this.postUpdate();
     this.onRender(this.getClbOpts());
     return this;
-  }
+  },
 });

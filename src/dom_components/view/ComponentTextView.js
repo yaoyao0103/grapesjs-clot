@@ -127,6 +127,7 @@ export default ComponentView.extend({
    * Merge content from the DOM to the model
    */
   syncContent(opts = {}) {
+    console.log('dom_components/view/ComponentTextView.js => syncContent start');
     const { model, rte, rteEnabled } = this;
     if (!rteEnabled && !opts.force) return;
     const content = this.getContent();
@@ -142,6 +143,7 @@ export default ComponentView.extend({
     } else {
       comps.resetFromString(content, opts);
     }
+    console.log('dom_components/view/ComponentTextView.js => syncContent end');
   },
 
   insertComponent(content, opts = {}) {

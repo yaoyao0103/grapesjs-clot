@@ -13,6 +13,7 @@ export default Backbone.View.extend({
   },
 
   removeChildren(removed, coll, opts = {}) {
+    console.log('dom_component/view/ComponentsView.js => removeChildren start');
     removed.views.forEach(view => {
       if (!view) return;
       const { childrenView, scriptContainer } = view;
@@ -23,6 +24,7 @@ export default Backbone.View.extend({
 
     const inner = removed.components();
     inner.forEach(it => this.removeChildren(it, coll, opts));
+    console.log('dom_component/view/ComponentsView.js => removeChildren end');
   },
 
   /**
@@ -33,6 +35,7 @@ export default Backbone.View.extend({
    * @private
    * */
   addTo(model, coll = {}, opts = {}) {
+    console.log('dom_component/view/ComponentsView.js => addTo start');
     const em = this.config.em;
     const i = this.collection.indexOf(model);
     this.addToCollection(model, null, i);
@@ -44,6 +47,7 @@ export default Backbone.View.extend({
       };
       triggerAdd(model);
     }
+    console.log('dom_component/view/ComponentsView.js => addTo end');
   },
 
   /**

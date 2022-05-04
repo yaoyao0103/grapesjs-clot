@@ -989,6 +989,7 @@ export default Backbone.View.extend({
    * @return void
    * */
   endMove(e) {
+    console.log('utils/Sorter.js => endMove start');
     const src = this.sourceEl;
     const moved = [];
     const docs = this.getDocuments();
@@ -1001,7 +1002,6 @@ export default Backbone.View.extend({
     off(docs, 'mouseup dragend touchend', this.endMove);
     off(docs, 'keydown', this.rollback);
     this.plh.style.display = 'none';
-
     if (src) {
       srcModel = this.getSourceModel();
       if (this.selectOnEnd && srcModel && srcModel.set) {
@@ -1009,7 +1009,6 @@ export default Backbone.View.extend({
         srcModel.set('status', 'selected');
       }
     }
-
     if (this.moved && target) {
       const toMove = this.toMove;
       const toMoveArr = isArray(toMove) ? toMove : toMove ? [toMove] : [src];
@@ -1017,15 +1016,12 @@ export default Backbone.View.extend({
         moved.push(this.move(target, model, lastPos));
       });
     }
-
     if (this.plh) this.plh.style.display = 'none';
     var dragHelper = this.dragHelper;
-
     if (dragHelper) {
       dragHelper.parentNode.removeChild(dragHelper);
       this.dragHelper = null;
     }
-
     this.disableTextable();
     this.selectTargetModel();
     this.toggleSortCursor();
@@ -1033,7 +1029,6 @@ export default Backbone.View.extend({
     this.toMove = null;
     this.eventMove = 0;
     this.dropModel = null;
-
     if (isFunction(onEndMove)) {
       const data = {
         target: srcModel,
@@ -1042,8 +1037,8 @@ export default Backbone.View.extend({
       };
       moved.length ? moved.forEach(m => onEndMove(m, this, data)) : onEndMove(null, this, { ...data, cancelled: 1 });
     }
-
     isFunction(onEnd) && onEnd({ sorter: this });
+    console.log('utils/Sorter.js => endMove end');
   },
 
   /**
@@ -1053,6 +1048,7 @@ export default Backbone.View.extend({
    * @param {Object} pos Object with position coordinates
    * */
   move(dst, src, pos) {
+    console.log('utils/Sorter.js move start');
     const { em, dropContent } = this;
     const srcEl = getElement(src);
     const warns = [];
@@ -1090,6 +1086,7 @@ export default Backbone.View.extend({
           delete opts.at;
           created = trgModel.getView().insertComponent(modelToDrop, opts);
         } else {
+          // add modelToDrop at index opts.at of targetCollection
           created = targetCollection.add(modelToDrop, opts);
         }
       }
@@ -1119,7 +1116,7 @@ export default Backbone.View.extend({
       dst,
       srcEl,
     });
-
+    console.log('utils/Sorter.js move end');
     return created;
   },
 

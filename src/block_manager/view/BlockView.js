@@ -8,7 +8,7 @@ export default Backbone.View.extend({
     mousedown: 'startDrag',
     dragstart: 'handleDragStart',
     drag: 'handleDrag',
-    dragend: 'handleDragEnd'
+    dragend: 'handleDragEnd',
   },
 
   initialize(o, config = {}) {
@@ -26,6 +26,7 @@ export default Backbone.View.extend({
   },
 
   handleClick(ev) {
+    console.log('BlockView.js => handleClick start');
     const { config, model, em } = this;
     const onClick = model.get('onClick') || config.appendOnClick;
     em.trigger('block:click', model, ev);
@@ -63,6 +64,7 @@ export default Backbone.View.extend({
 
     const result = target && target.append(content)[0];
     result && em.setSelected(result, { scroll: 1 });
+    console.log('BlockView.js => handleClick end');
   },
 
   /**
@@ -73,8 +75,7 @@ export default Backbone.View.extend({
     const { config, em, model } = this;
     const disable = model.get('disable');
     //Right or middel click
-    if (e.button !== 0 || !config.getSorter || this.el.draggable || disable)
-      return;
+    if (e.button !== 0 || !config.getSorter || this.el.draggable || disable) return;
     em.refreshCanvas();
     const sorter = config.getSorter();
     sorter.setDragHelper(this.el, e);
@@ -117,8 +118,7 @@ export default Backbone.View.extend({
     const attr = model.get('attributes') || {};
     const cls = attr.class || '';
     const className = `${ppfx}block`;
-    const label =
-      (em && em.t(`blockManager.labels.${model.id}`)) || model.get('label');
+    const label = (em && em.t(`blockManager.labels.${model.id}`)) || model.get('label');
     const render = model.get('render');
     const media = model.get('media');
     const clsAdd = disable ? `${className}--disable` : `${ppfx}four-color-h`;
@@ -133,5 +133,5 @@ export default Backbone.View.extend({
     const result = render && render({ el, model, className, prefix: ppfx });
     if (result) el.innerHTML = result;
     return this;
-  }
+  },
 });

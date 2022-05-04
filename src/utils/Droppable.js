@@ -17,13 +17,7 @@ export default class Droppable {
     const els = Array.isArray(el) ? el : [el];
     this.el = el;
     this.counter = 0;
-    bindAll(
-      this,
-      'handleDragEnter',
-      'handleDragOver',
-      'handleDrop',
-      'handleDragLeave'
-    );
+    bindAll(this, 'handleDragEnter', 'handleDragOver', 'handleDrop', 'handleDragLeave');
     els.forEach(el => this.toggleEffects(el, 1));
 
     return this;
@@ -52,7 +46,7 @@ export default class Droppable {
           },
           customTarget({ event }) {
             return doc.elementFromPoint(event.clientX, event.clientY);
-          }
+          },
         }
       : null;
     method(frameEl, 'pointerenter', this.handleDragEnter);
@@ -74,11 +68,16 @@ export default class Droppable {
   }
 
   endDrop(cancel, ev) {
+    console.log('utils/Droppable.js => endDrop start');
     const { em, dragStop } = this;
     this.counter = 0;
+    console.log('------------------------');
     dragStop && dragStop(cancel);
+    console.log('************************');
     this.__customTglEff(false);
+    console.log('/////////////////////////');
     em.trigger('canvas:dragend', ev);
+    console.log('utils/Droppable.js => endDrop end');
   }
 
   handleDragLeave(ev) {
@@ -123,7 +122,7 @@ export default class Droppable {
           }
           this.handleDragEnd(comp, dt);
           target.remove();
-        }
+        },
       });
       dragStop = cancel => dragger.stop(ev, { cancel });
       dragContent = cnt => (content = cnt);
@@ -141,14 +140,16 @@ export default class Droppable {
         pfx: 'gjs-',
         onEndMove: model => this.handleDragEnd(model, dt),
         document: this.el.ownerDocument,
-        ...(this.sortOpts || {})
+        ...(this.sortOpts || {}),
       });
       sorter.setDropContent(content);
       sorter.startSort();
       this.sorter = sorter;
       dragStop = cancel => {
+        console.log('dragStop start');
         cancel && (sorter.moved = 0);
         sorter.endMove();
+        console.log('dragStop end');
       };
       dragContent = content => sorter.setDropContent(content);
     }
@@ -159,6 +160,7 @@ export default class Droppable {
   }
 
   handleDragEnd(model, dt) {
+    console.log('utils/Droppable.js => handleDragEnd start');
     const { em } = this;
     this.over = 0;
     if (model) {
@@ -166,6 +168,7 @@ export default class Droppable {
       em.trigger('canvas:drop', dt, model);
     }
     em.runDefault({ preserveSelected: 1 });
+    console.log('utils/Droppable.js => handleDragEnd end');
   }
 
   /**
@@ -182,12 +185,14 @@ export default class Droppable {
    * drop, accidentally, happens on some external element (DOM not inside the iframe)
    */
   handleDrop(ev) {
+    console.log('utils/Droppable.js => handleDrop start');
     ev.preventDefault();
     const { dragContent } = this;
     const dt = ev.dataTransfer;
     const content = this.getContentByData(dt).content;
     ev.target.style.border = '';
     content && dragContent && dragContent(content);
+    console.log('utils/Droppable.js => handleDrop end');
     this.endDrop(!content, ev);
   }
 
@@ -208,7 +213,7 @@ export default class Droppable {
           content.push({
             type,
             file,
-            attributes: { alt: file.name }
+            attributes: { alt: file.name },
           });
         }
       }
@@ -220,7 +225,7 @@ export default class Droppable {
       content = {
         type: 'link',
         attributes: { href: content },
-        content: content
+        content: content,
       };
     } else if (indexOf(types, 'text/json') >= 0) {
       const json = dt && dt.getData('text/json');

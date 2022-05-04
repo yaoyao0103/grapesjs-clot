@@ -230,6 +230,7 @@ export default Backbone.View.extend({
    * @private
    * */
   updateStyle(m, v, opts = {}) {
+    console.log('ComponentView.js => updateStyle start');
     const { model, em } = this;
 
     if (em && em.getConfig('avoidInlineStyle') && !opts.inline) {
@@ -238,6 +239,7 @@ export default Backbone.View.extend({
     } else {
       this.setAttribute('style', model.styleToString(opts));
     }
+    console.log('ComponentView.js => updateStyle end');
   },
 
   /**
@@ -279,6 +281,8 @@ export default Backbone.View.extend({
    * @private
    * */
   updateAttributes() {
+    console.log('ComponentView.js => updateAttributes start');
+    console.trace();
     const attrs = [];
     const { model, $el, el } = this;
     const { textable, type } = model.attributes;
@@ -304,6 +308,7 @@ export default Backbone.View.extend({
     keys(attr).forEach(key => attr[key] === false && delete attr[key]);
 
     $el.attr(attr);
+    console.log('ComponentView.js => updateAttributes end');
   },
 
   /**
@@ -311,9 +316,11 @@ export default Backbone.View.extend({
    * @private
    * */
   updateContent() {
+    console.log('ComponentView.js => updateContent start');
     const content = this.model.get('content');
     const hasComps = this.model.components().length;
     this.getChildrenContainer().innerHTML = hasComps ? '' : content;
+    console.log('ComponentView.js => updateContent end');
   },
 
   /**

@@ -75,6 +75,7 @@ export default class Property extends View {
    * @private
    */
   updateStatus() {
+    console.log('style_manager/view/PropertyView.js => updateStatus start');
     const { model, pfx, ppfx, config } = this;
     const updatedCls = `${ppfx}four-color`;
     const computedCls = `${ppfx}color-warn`;
@@ -92,6 +93,7 @@ export default class Property extends View {
     }
 
     this.parent?.updateStatus();
+    console.log('style_manager/view/PropertyView.js => updateStatus end');
   }
 
   /**
@@ -126,8 +128,10 @@ export default class Property extends View {
   }
 
   onValueChange(m, val, opt = {}) {
+    console.log('style_manager/view/PropertyView.js => onValueChange start');
     this.setValue(this.model.getFullValue());
     this.updateStatus();
+    console.log('style_manager/view/PropertyView.js => onValueChange end');
   }
 
   /**
@@ -136,15 +140,21 @@ export default class Property extends View {
    * @param {String} value The value from the model
    * */
   setValue(value) {
+    console.log('style_manager/view/PropertyView.js => setValue start');
+    console.trace();
     const { model } = this;
     const result = isUndefined(value) || value === '' ? model.getDefaultValue() : value;
     if (this.update) return this.__update(result);
     this.__setValueInput(result);
+    console.log('style_manager/view/PropertyView.js => setValue end');
   }
 
   __setValueInput(value) {
+    console.log('style_manager/view/PropertyView.js => __setValueInput start');
+    console.trace();
     const input = this.getInputEl();
     input && (input.value = value);
+    console.log('style_manager/view/PropertyView.js => __setValueInput end');
   }
 
   getInputEl() {
@@ -171,12 +181,15 @@ export default class Property extends View {
   }
 
   __update(value) {
+    console.log('style_manager/view/PropertyView.js => __update start');
+    console.trace();
     const update = this.update && this.update.bind(this);
     update &&
       update({
         ...this._getClbOpts(),
         value,
       });
+    console.log('style_manager/view/PropertyView.js => __update end');
   }
 
   __change(...args) {
@@ -185,6 +198,7 @@ export default class Property extends View {
   }
 
   __updateStyle(value, { complete, partial, ...opts } = {}) {
+    console.log('style_manager/view/PropertyView.js => __updateStyle start');
     const { model } = this;
     const final = complete !== false && partial !== true;
 
@@ -193,6 +207,7 @@ export default class Property extends View {
     } else {
       model.upValue(value, { partial: !final });
     }
+    console.log('style_manager/view/PropertyView.js => __updateStyle end');
   }
 
   _getClbOpts() {
