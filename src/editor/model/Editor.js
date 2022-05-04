@@ -343,7 +343,7 @@ export default class EditorModel extends Model {
       // Hanlde multiple selection
       if (ctrlKey && mltSel) {
         return this.toggleSelected(model);
-      } else if (shiftKey && mltSel) {
+      } /*else if (shiftKey && mltSel) {
         this.clearSelection(this.get('Canvas').getWindow());
         const coll = model.collection;
         const index = model.index();
@@ -379,7 +379,7 @@ export default class EditorModel extends Model {
         }
 
         return this.addSelected(model);
-      }
+      }*/
 
       !multiple && this.removeSelected(selected.filter(s => s !== model));
       this.addSelected(model, opts);
