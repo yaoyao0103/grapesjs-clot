@@ -29,6 +29,7 @@ export default {
   },
 
   toggleDragger(enable, ev) {
+    console.log('commands/view/CanvasMove.js => toggleDragger start');
     const { canvasModel, em } = this;
     let { dragger } = this;
     const methodCls = enable ? 'add' : 'remove';
@@ -39,7 +40,7 @@ export default {
         getPosition() {
           return {
             x: canvasModel.get('x'),
-            y: canvasModel.get('y')
+            y: canvasModel.get('y'),
           };
         },
         setPosition({ x, y }) {
@@ -53,12 +54,13 @@ export default {
         },
         onEnd(ev, dragger) {
           em.trigger('canvas:move:end', dragger);
-        }
+        },
       });
       this.dragger = dragger;
     }
 
     enable ? dragger.start(ev) : dragger.stop();
+    console.log('commands/view/CanvasMove.js => toggleDragger end');
   },
 
   toggleMove(enable) {
@@ -73,5 +75,5 @@ export default {
     methodsEv[methodEv](document, 'keyup', this.onKeyUp);
     methodsEv[methodEv](canvas, 'mousedown', this.enableDragger);
     methodsEv[methodEv](document, 'mouseup', this.disableDragger);
-  }
+  },
 };

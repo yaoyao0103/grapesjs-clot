@@ -121,10 +121,12 @@ export default class Property extends View {
    * the value of the model which will propogate those changes to the target
    */
   inputValueChanged(ev) {
+    console.log('PropertyView.js => inputValueChanged start');
     ev && ev.stopPropagation();
     // Skip the default update in case a custom emit method is defined
     if (this.emit) return;
     this.model.upValue(ev.target.value);
+    console.log('PropertyView.js => inputValueChanged end');
   }
 
   onValueChange(m, val, opt = {}) {

@@ -67,6 +67,10 @@ export default Backbone.Model.extend({
     console.log('trait_manager/model/Trait.js => setTargetValue start');
     const target = this.target;
     const name = this.get('name');
+    console.log('value: ' + JSON.stringify(value));
+    console.log('opts: ' + JSON.stringify(opts));
+    console.log('target: ' + JSON.stringify(target));
+    console.log('name: ' + JSON.stringify(name));
     if (isUndefined(value)) return;
     let valueToSet = value;
 

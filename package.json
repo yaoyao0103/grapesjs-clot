@@ -1,7 +1,7 @@
 {
   "name": "grapesjs",
   "description": "Free and Open Source Web Builder Framework",
-  "version": "0.18.6",
+  "version": "0.18.35",
   "author": "Artur Arseniev",
   "license": "BSD-3-Clause",
   "homepage": "http://grapesjs.com",
@@ -18,9 +18,13 @@
   "dependencies": {
     "backbone": "1.3.3",
     "backbone-undo": "^0.2.5",
+    "circular-json": "^0.5.9",
     "codemirror": "^5.63.0",
     "codemirror-formatting": "^1.0.0",
+    "net": "^1.0.2",
     "promise-polyfill": "^8.1.3",
+    "sockjs-client": "^1.6.0",
+    "stompjs": "^2.3.3",
     "underscore": "^1.13.1"
   },
   "devDependencies": {

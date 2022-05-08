@@ -3,6 +3,7 @@ import ComponentView from './ComponentView';
 import { bindAll } from 'underscore';
 
 const compProt = ComponentView.prototype;
+var CircularJSON = require('circular-json');
 
 export default ComponentView.extend({
   events: {
@@ -83,7 +84,9 @@ export default ComponentView.extend({
   },
 
   onDisable() {
+    // console.log("ComponentTextView.js => onDisable start");
     this.disableEditing();
+    // console.log("ComponentTextView.js => onDisable end");
   },
 
   /**
@@ -91,7 +94,14 @@ export default ComponentView.extend({
    * @private
    * */
   async disableEditing(opts = {}) {
+    console.log('dom_components/view/ComponentTextView.js => disableEditing start');
     const { model, rte, activeRte, em } = this;
+    opts.model = model;
+    opts.rte = rte;
+    opts.activeRte = activeRte;
+    opts.em = em;
+    opts.childrenContainerInnerHTML = this.getChildrenContainer().innerHTML;
+
     // There are rare cases when disableEditing is called when the view is already removed
     // so, we have to check for the model, this will avoid breaking stuff.
     const editable = model && model.get('editable');
@@ -110,6 +120,7 @@ export default ComponentView.extend({
     }
 
     this.toggleEvents();
+    console.log('dom_components/view/ComponentTextView.js => disableEditing end');
   },
 
   /**
@@ -129,6 +140,7 @@ export default ComponentView.extend({
   syncContent(opts = {}) {
     console.log('dom_components/view/ComponentTextView.js => syncContent start');
     const { model, rte, rteEnabled } = this;
+    //console.log("opts: " + CircularJSON.stringify(opts));
     if (!rteEnabled && !opts.force) return;
     const content = this.getContent();
     const comps = model.components();
@@ -210,6 +222,7 @@ export default ComponentView.extend({
    * @param {Boolean} enable
    */
   toggleEvents(enable) {
+    console.log('ComponentView.js => toggleEvent start');
     const { em, model, $el } = this;
     const mixins = { on, off };
     const method = enable ? 'on' : 'off';
@@ -242,5 +255,6 @@ export default ComponentView.extend({
         el && el.tagName == 'BODY' && (el = 0);
       }
     }
+    console.log('ComponentView.js => toggleEvent end');
   },
 });

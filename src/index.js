@@ -4,9 +4,11 @@ import Editor from './editor';
 import polyfills from 'utils/polyfills';
 import { getGlobal } from 'utils/mixins';
 import PluginManager from './plugin_manager';
+import { connectWebSocket } from 'utils/WebSocket';
 
 polyfills();
 
+export var myEditor;
 const plugins = new PluginManager();
 const editors = [];
 const defaultConfig = {
@@ -17,7 +19,7 @@ const defaultConfig = {
   plugins: [],
 
   // Custom options for plugins
-  pluginsOpts: {}
+  pluginsOpts: {},
 };
 
 export default {
@@ -47,12 +49,12 @@ export default {
    * })
    */
   init(config = {}) {
+    connectWebSocket();
     const { headless } = config;
     const els = config.container;
     if (!els && !headless) throw new Error("'container' is required");
     config = { ...defaultConfig, ...config, grapesjs: this };
-    config.el =
-      !headless && (isElement(els) ? els : document.querySelector(els));
+    config.el = !headless && (isElement(els) ? els : document.querySelector(els));
     const editor = new Editor(config, { $ }).init();
     const em = editor.getModel();
 
@@ -74,7 +76,7 @@ export default {
       } else {
         em.logWarning(`Plugin ${pluginId} not found`, {
           context: 'plugins',
-          plugin: pluginId
+          plugin: pluginId,
         });
       }
     });
@@ -85,7 +87,8 @@ export default {
     em.loadOnStart();
     config.autorender && !headless && editor.render();
     editors.push(editor);
+    myEditor = editor;
 
     return editor;
-  }
+  },
 };

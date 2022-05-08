@@ -192,8 +192,9 @@ export default class Droppable {
     const content = this.getContentByData(dt).content;
     ev.target.style.border = '';
     content && dragContent && dragContent(content);
-    console.log('utils/Droppable.js => handleDrop end');
     this.endDrop(!content, ev);
+    console.log('utils/Droppable.js => handleDrop end');
+    let opts = new Object();
   }
 
   getContentByData(dt) {

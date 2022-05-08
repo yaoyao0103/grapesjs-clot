@@ -271,8 +271,7 @@ export default {
    * @private
    */
   onClick(ev) {
-    console.log('commands/view/SelecteComponent.js => onClick start');
-    console.log(ev);
+    console.log('commands/view/SelectComponent.js => onClick start');
     ev.stopPropagation();
     ev.preventDefault();
     const { em } = this;
@@ -295,7 +294,7 @@ export default {
       }
       this.select(model, ev);
     }
-    console.log('commands/view/SelecteComponent.js => onClick end');
+    console.log('commands/view/SelectComponent.js => onClick end');
   },
 
   /**

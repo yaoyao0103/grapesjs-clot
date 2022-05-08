@@ -1,10 +1,14 @@
 import { isArray } from 'underscore';
+import { sendMessage } from '../../utils/WebSocket';
+import CircularJSON from 'circular-json';
 
 export default {
-  run(ed, sender, opts = {}) {
-    console.log('command/view/ComponentDelete.js => start');
+  run(ed, sender, opts = {}, isLocalChange = 1) {
+    console.log('command/view/ComponentDelete.js => run start');
     const toSelect = [];
     let components = opts.component || ed.getSelectedAll();
+    console.log('component: ' + component.constructor.name);
+    opts.component = CircularJSON.parse(CircularJSON.stringify(components));
     components = isArray(components) ? [...components] : [components];
 
     // It's important to deselect components first otherwise,
@@ -22,7 +26,15 @@ export default {
     });
 
     toSelect.length && ed.select(toSelect);
-    console.log('command/view/ComponentDelete.js => end');
+    console.log('command/view/ComponentDelete.js => run end');
+    if (isLocalChange) {
+      let op = {
+        action: 'delete-component',
+        opts: opts,
+      };
+      sendMessage(op);
+    }
+
     return components;
   },
 };

@@ -77,6 +77,7 @@ export default Backbone.View.extend({
    * @private
    */
   onChange(event) {
+    console.log('TraitView.js => onChange start');
     const el = this.getInputElem();
     if (el && !isUndefined(el.value)) {
       this.model.set('value', el.value);
@@ -85,6 +86,7 @@ export default Backbone.View.extend({
       ...this.getClbOpts(),
       event,
     });
+    console.log('TraitView.js => onChange end');
   },
 
   getValueForTarget() {
@@ -107,6 +109,7 @@ export default Backbone.View.extend({
       this.postUpdate();
     } else {
       const val = this.getValueForTarget();
+      console.log('model: ' + JSON.stringify(model));
       model.setTargetValue(val, opts);
     }
     console.log('trait_manager/view/TraitView.js => onValueChange end');
