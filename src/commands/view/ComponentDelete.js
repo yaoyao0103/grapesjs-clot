@@ -1,9 +1,18 @@
 import { isArray } from 'underscore';
-import { sendMessage } from '../../utils/WebSocket';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+  SendingOpToController,
+} from '../../utils/WebSocket';
 import CircularJSON from 'circular-json';
 
 export default {
+  /* be called by applyOp() or localChange*/
   run(ed, sender, opts = {}, isLocalChange = 1) {
+    /******************* apply 'delete-component' operation start ********************/
     console.log('command/view/ComponentDelete.js => run start');
     const toSelect = [];
     let components = opts.component || ed.getSelectedAll();
@@ -27,12 +36,29 @@ export default {
 
     toSelect.length && ed.select(toSelect);
     console.log('command/view/ComponentDelete.js => run end');
+    /******************* apply 'delete-component' operation end ********************/
     if (isLocalChange) {
       let op = {
         action: 'delete-component',
         opts: opts,
       };
-      sendMessage(op);
+      if (ClientState == ClientStateEnum.Synced) {
+        // set state to ApplyingLocalOp
+        setState(ClientStateEnum.ApplyingLocalOp);
+        // increase localTS and set localOp
+        ApplyingLocalOp(op);
+        // set state to SendingOpToController
+        setState(ClientStateEnum.SendingOpToController);
+        // send op to controller
+        SendingOpToController();
+      } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+        // set state to ApplyingBufferedLocalOp
+        setState(ClientStateEnum.ApplyingBufferedLocalOp);
+        // push the op to buffer
+        ApplyingBufferedLocalOp(op);
+        // set state to AwaitingWithBuffer
+        setState(ClientStateEnum.AwaitingWithBuffer);
+      }
     }
 
     return components;
