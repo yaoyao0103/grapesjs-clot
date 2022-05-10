@@ -221,7 +221,9 @@ export default (config = {}, opts = {}) => {
      * });
      */
     setComponents(components, opt = {}) {
+      console.log('editor/index.js/setComponents()--start');
       em.setComponents(components, opt);
+      console.log('editor/index.js/setComponents()--end');
       return this;
     },
 

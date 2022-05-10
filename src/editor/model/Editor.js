@@ -488,6 +488,8 @@ export default class EditorModel extends Model {
    * @private
    */
   setComponents(components, opt = {}) {
+    console.log('editor/model/editor.js/setComponents()--start');
+    console.log('editor/model/editor.js/setComponents()--end');
     return this.get('DomComponents').setComponents(components, opt);
   }
 

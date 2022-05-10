@@ -52,7 +52,7 @@ import { getElement, getViewEl } from 'utils/mixins';
 import defaults from './config/config';
 import Canvas from './model/Canvas';
 import canvasView from './view/CanvasView';
-
+export var myCanvas;
 export default () => {
   let c = {};
   let canvas;
@@ -89,6 +89,7 @@ export default () => {
       this.model = canvas;
       this.startAutoscroll = this.startAutoscroll.bind(this);
       this.stopAutoscroll = this.stopAutoscroll.bind(this);
+      myCanvas = canvas;
       return this;
     },
 

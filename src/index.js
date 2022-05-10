@@ -49,6 +49,7 @@ export default {
    * })
    */
   init(config = {}) {
+    console.log('index.js/init()--start');
     connectWebSocket();
     const { headless } = config;
     const els = config.container;
@@ -87,8 +88,15 @@ export default {
     em.loadOnStart();
     config.autorender && !headless && editor.render();
     editors.push(editor);
-    myEditor = editor;
+    //let cmp =editor.Components;
+    let wrapper = editor.getWrapper();
+    wrapper.set('attributes', { id: 'Hello!' });
 
+    let id = wrapper.get('attributes');
+    console.log('index--id:');
+    console.log(id.id);
+    myEditor = editor;
+    console.log('index.js/init()--end');
     return editor;
   },
 };

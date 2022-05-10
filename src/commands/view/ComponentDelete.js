@@ -7,7 +7,7 @@ export default {
     console.log('command/view/ComponentDelete.js => run start');
     const toSelect = [];
     let components = opts.component || ed.getSelectedAll();
-    console.log('component: ' + component.constructor.name);
+    //console.log('component: ' + component.constructor.name);
     opts.component = CircularJSON.parse(CircularJSON.stringify(components));
     components = isArray(components) ? [...components] : [components];
 
@@ -32,7 +32,7 @@ export default {
         action: 'delete-component',
         opts: opts,
       };
-      sendMessage(op);
+      sendMessage(op, null);
     }
 
     return components;

@@ -14,6 +14,9 @@ export const connectWebSocket = () => {
   let socket = new SockJS('http://localhost:8081/websocket');
   stompClient = Stomp.over(socket);
   stompClient.connect({}, onConnected, onError);
+  // let Wrapper=FramesView.getWrapper();
+  // console.log('Wrapper:');
+  // console.log(Wrapper);
 };
 
 const onConnected = () => {
@@ -40,7 +43,7 @@ const onError = () => {
   console.log('Error!!');
 };
 
-export const sendMessage = op => {
+export const sendMessage = (op, id) => {
   //console.log("op:" + JSON.stringify(op));
   localTS += 1;
   let CtoS_Msg = {
@@ -49,6 +52,7 @@ export const sendMessage = op => {
     type: 'OP',
     ts: localTS,
     op: CircularJSON.stringify(op),
+    id: id,
   };
   stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
 };
@@ -56,10 +60,31 @@ export const sendMessage = op => {
 const onMessageReceived = payload => {
   let StoC_msg = CircularJSON.parse(payload.body);
   if (StoC_msg.type === 'JOIN') {
+    localTS += 1;
     if (StoC_msg.sender === username) {
       sessionId = StoC_msg.sessionId;
       //stompClient.subscribe('/user/' + sessionId + '/msg', onMessageReceived);
+    } else {
+      let wrapper = myEditor.getWrapper();
+      let attr = wrapper.get('attributes');
+      let id = attr.id;
+      //console.log(canavs);
+      //let id= Components.getId();
+      let CtoS_Msg = {
+        sender: username,
+        sessionId: sessionId,
+        type: 'COPY',
+        ts: localTS,
+        op: CircularJSON.stringify(wrapper),
+        id: id,
+      };
+      stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
     }
+  } else if (StoC_msg.type === 'COPY') {
+    let remoteOp = CircularJSON.parse(StoC_msg.op);
+    let wrapper = myEditor.getWrapper();
+    wrapper.set('attributes', { id: StoC_msg.id });
+    myEditor.setComponents(remoteOp);
   } else if (StoC_msg.type === 'OP') {
     let remoteOp = CircularJSON.parse(StoC_msg.op);
     let opts = remoteOp.opts;
