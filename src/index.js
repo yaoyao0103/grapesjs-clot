@@ -4,11 +4,13 @@ import Editor from './editor';
 import polyfills from 'utils/polyfills';
 import { getGlobal } from 'utils/mixins';
 import PluginManager from './plugin_manager';
-import { connectWebSocket } from 'utils/WebSocket';
+import { stompClient, connectWebSocket } from 'utils/WebSocket';
+import CircularJSON from 'circular-json';
 
 polyfills();
 
-export var myEditor;
+export var myEditor = null;
+export var myCurrentFrame = null;
 const plugins = new PluginManager();
 const editors = [];
 const defaultConfig = {
@@ -50,7 +52,7 @@ export default {
    */
   init(config = {}) {
     console.log('index.js/init()--start');
-    connectWebSocket();
+    if (!stompClient) connectWebSocket();
     const { headless } = config;
     const els = config.container;
     if (!els && !headless) throw new Error("'container' is required");
@@ -91,11 +93,8 @@ export default {
     //let cmp =editor.Components;
     let wrapper = editor.getWrapper();
     wrapper.set('attributes', { id: 'Hello!' });
-
-    let id = wrapper.get('attributes');
-    console.log('index--id:');
-    console.log(id.id);
     myEditor = editor;
+    myCurrentFrame = myEditor.getModel().getCurrentFrame();
     console.log('index.js/init()--end');
     return editor;
   },

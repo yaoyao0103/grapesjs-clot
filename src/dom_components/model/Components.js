@@ -12,6 +12,14 @@ export const getComponentIds = (cmp, res = []) => {
   return res;
 };
 
+export const setComponentIds = cmp => {
+  const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
+  cmps.map(cmp => {
+    cmp.set('attributes', { id: cmp.getId() });
+    setComponentIds(cmp.components().models);
+  });
+};
+
 const getComponentsFromDefs = (items, all = {}, opts = {}) => {
   const itms = isArray(items) ? items : [items];
 
@@ -184,9 +192,7 @@ export default Backbone.Collection.extend({
   },
 
   add(models, opt = {}) {
-    console.trace();
-    console.log(models);
-    console.log(opt);
+    //console.trace();
     console.log('Components.js => add start');
     opt.keepIds = [...(opt.keepIds || []), ...getComponentIds(opt.previousModels)];
 

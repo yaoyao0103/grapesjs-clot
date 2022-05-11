@@ -3,8 +3,9 @@ import SockJS from 'sockjs-client';
 import ComponentDelete from '../commands/view/ComponentDelete';
 import { myEditor } from '../index.js';
 import CircularJSON from 'circular-json';
+import { setComponentIds } from '../dom_components/model/Components';
 
-export var stompClient;
+export var stompClient = null;
 var localTS = 0;
 var username = '';
 var sessionId = '';
@@ -43,7 +44,7 @@ const onError = () => {
   console.log('Error!!');
 };
 
-export const sendMessage = (op, id) => {
+export const sendMessage = op => {
   //console.log("op:" + JSON.stringify(op));
   localTS += 1;
   let CtoS_Msg = {
@@ -52,7 +53,6 @@ export const sendMessage = (op, id) => {
     type: 'OP',
     ts: localTS,
     op: CircularJSON.stringify(op),
-    id: id,
   };
   stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
 };
@@ -66,25 +66,40 @@ const onMessageReceived = payload => {
       //stompClient.subscribe('/user/' + sessionId + '/msg', onMessageReceived);
     } else {
       let wrapper = myEditor.getWrapper();
-      let attr = wrapper.get('attributes');
-      let id = attr.id;
-      //console.log(canavs);
-      //let id= Components.getId();
+      let components = myEditor.getComponents();
+      //console.log("getComponentIds:" + getComponentIds(components));
+      setComponentIds(components);
+
+      let id = wrapper.get('attributes').id;
+      let op = {
+        action: 'copy-wrapper',
+        opts: {
+          components: components,
+          id: id,
+        },
+      };
       let CtoS_Msg = {
         sender: username,
         sessionId: sessionId,
         type: 'COPY',
         ts: localTS,
-        op: CircularJSON.stringify(wrapper),
-        id: id,
+        op: CircularJSON.stringify(op),
       };
       stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
     }
   } else if (StoC_msg.type === 'COPY') {
     let remoteOp = CircularJSON.parse(StoC_msg.op);
-    let wrapper = myEditor.getWrapper();
-    wrapper.set('attributes', { id: StoC_msg.id });
-    myEditor.setComponents(remoteOp);
+    if (remoteOp.action == 'copy-wrapper') {
+      let opts = remoteOp.opts;
+      let id = opts.id;
+      let components = opts.components;
+      //let currentFrame = opts.currentFrame;
+      console.log('components:' + components);
+      let wrapper = myEditor.getWrapper();
+      wrapper.set('attributes', { id: id });
+      myEditor.setComponents(components);
+      //myEditor.getModel().setCurrentFrame(currentFrame);
+    }
   } else if (StoC_msg.type === 'OP') {
     let remoteOp = CircularJSON.parse(StoC_msg.op);
     let opts = remoteOp.opts;

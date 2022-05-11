@@ -62,7 +62,7 @@ export default class Property extends Model {
 
   __upTargetsStyle(style, opts) {
     console.log('style_manager/model/Property.js => __upTargetsStyle start');
-    console.trace();
+    //sconsole.trace();
     console.log('style: ' + JSON.stringify(style));
     console.log('opts: ' + JSON.stringify(opts));
     const sm = this.em?.get('StyleManager');

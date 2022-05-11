@@ -282,7 +282,7 @@ export default Backbone.View.extend({
    * */
   updateAttributes() {
     console.log('ComponentView.js => updateAttributes start');
-    console.trace();
+    //console.trace();
     const attrs = [];
     const { model, $el, el } = this;
     const { textable, type } = model.attributes;

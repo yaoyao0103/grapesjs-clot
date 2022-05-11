@@ -330,8 +330,6 @@ export default (config = {}, opts = {}) => {
      */
     select(el, opts) {
       console.log('editor/index.js => select start');
-      console.log(el);
-      console.log(opts);
       em.setSelected(el, opts);
       console.log('editor/index.js => select end');
       return this;

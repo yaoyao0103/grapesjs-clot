@@ -307,7 +307,7 @@ export default class EditorModel extends Model {
    * @private
    */
   setSelected(el, opts = {}) {
-    console.trace();
+    //console.trace();
     console.log('Editor.js => setSelected start');
     const { event } = opts;
     const ctrlKey = event && (event.ctrlKey || event.metaKey);

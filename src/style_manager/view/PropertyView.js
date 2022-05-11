@@ -143,7 +143,6 @@ export default class Property extends View {
    * */
   setValue(value) {
     console.log('style_manager/view/PropertyView.js => setValue start');
-    console.trace();
     const { model } = this;
     const result = isUndefined(value) || value === '' ? model.getDefaultValue() : value;
     if (this.update) return this.__update(result);
@@ -153,7 +152,7 @@ export default class Property extends View {
 
   __setValueInput(value) {
     console.log('style_manager/view/PropertyView.js => __setValueInput start');
-    console.trace();
+    //console.trace();
     const input = this.getInputEl();
     input && (input.value = value);
     console.log('style_manager/view/PropertyView.js => __setValueInput end');
@@ -184,7 +183,7 @@ export default class Property extends View {
 
   __update(value) {
     console.log('style_manager/view/PropertyView.js => __update start');
-    console.trace();
+    //console.trace();
     const update = this.update && this.update.bind(this);
     update &&
       update({
