@@ -67,6 +67,7 @@ const onMessageReceived = payload => {
     } else {
       let wrapper = myEditor.getWrapper();
       let components = myEditor.getComponents();
+      let style = myEditor.getStyle();
       //console.log("getComponentIds:" + getComponentIds(components));
       setComponentIds(components);
 
@@ -75,6 +76,7 @@ const onMessageReceived = payload => {
         action: 'copy-wrapper',
         opts: {
           components: components,
+          style: style,
           id: id,
         },
       };
@@ -91,14 +93,12 @@ const onMessageReceived = payload => {
     let remoteOp = CircularJSON.parse(StoC_msg.op);
     if (remoteOp.action == 'copy-wrapper') {
       let opts = remoteOp.opts;
-      let id = opts.id;
-      let components = opts.components;
-      //let currentFrame = opts.currentFrame;
-      console.log('components:' + components);
       let wrapper = myEditor.getWrapper();
-      wrapper.set('attributes', { id: id });
-      myEditor.setComponents(components);
-      //myEditor.getModel().setCurrentFrame(currentFrame);
+
+      // init the editor
+      wrapper.set('attributes', { id: opts.id });
+      myEditor.setComponents(opts.components);
+      myEditor.setStyle(opts.style);
     }
   } else if (StoC_msg.type === 'OP') {
     let remoteOp = CircularJSON.parse(StoC_msg.op);

@@ -96,11 +96,6 @@ export default ComponentView.extend({
   async disableEditing(opts = {}) {
     console.log('dom_components/view/ComponentTextView.js => disableEditing start');
     const { model, rte, activeRte, em } = this;
-    opts.model = model;
-    opts.rte = rte;
-    opts.activeRte = activeRte;
-    opts.em = em;
-    opts.childrenContainerInnerHTML = this.getChildrenContainer().innerHTML;
 
     // There are rare cases when disableEditing is called when the view is already removed
     // so, we have to check for the model, this will avoid breaking stuff.
