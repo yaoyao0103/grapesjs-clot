@@ -1,5 +1,11 @@
 import { isArray } from 'underscore';
-import { sendMessage } from '../../utils/WebSocket';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 import CircularJSON from 'circular-json';
 import { myEditor } from '../..';
 
@@ -29,20 +35,26 @@ export default {
 
     toSelect.length && ed.select(toSelect);
     console.log('command/view/ComponentDelete.js => run end');
+
     if (isLocalChange) {
       opts.component = CircularJSON.parse(CircularJSON.stringify(components));
       let op = {
         action: 'delete-component',
         opts: opts,
       };
-      sendMessage(op, null);
+      if (ClientState == ClientStateEnum.Synced) {
+        // set state to ApplyingLocalOp
+        setState(ClientStateEnum.ApplyingLocalOp);
+        // increase localTS and set localOp
+        ApplyingLocalOp(op);
+      } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+        // set state to ApplyingBufferedLocalOp
+        setState(ClientStateEnum.ApplyingBufferedLocalOp);
+        // push the op to buffer
+        ApplyingBufferedLocalOp(op);
+      }
     }
 
     return components;
   },
 };
-
-/*
-  ComponentDelete.run
-  params: components
-*/
