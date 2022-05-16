@@ -1,15 +1,15 @@
 import Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
-import ComponentDelete from '../commands/view/ComponentDelete';
 import { myEditor } from '../index.js';
+import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
 import { setComponentIds } from '../dom_components/model/Components';
+// op apply
+import ComponentDelete from '../commands/view/ComponentDelete';
 
 export var stompClient = null;
-var localTS = 0;
 var username = '';
 var sessionId = '';
-export var ClientState = ClientStateEnums.EditorInitializing;
 export const ClientStateEnum = {
   Synced: 1,
   AwaitingACK: 2,
@@ -23,10 +23,13 @@ export const ClientStateEnum = {
   SendingOpToController: 10,
   EditorInitializing: 11,
 };
-var remoteOp;
-var remoteTS;
-var localOpPrime;
-var remoteOpPrime;
+export var ClientState = ClientStateEnum.EditorInitializing;
+var localTS = 0;
+var localOp = null;
+var remoteOp = null;
+var remoteTS = 0;
+var localOpPrim = null;
+var remoteOpPrime = null;
 var opBuffer = new Array();
 var initBuffer = new Array();
 
@@ -67,7 +70,7 @@ const onMessageReceived = async payload => {
   if (StoC_msg.type === 'JOIN') {
     if (StoC_msg.sender === username) {
       sessionId = StoC_msg.sessionId;
-      clientNum = parseInt(StoC_msg.op);
+      let clientNum = parseInt(StoC_msg.op);
       if (clientNum == 1) {
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
@@ -76,12 +79,13 @@ const onMessageReceived = async payload => {
     }
     // join msg of other clients
     else {
+      console.log('state: EditorInitializing');
       let wrapper = myEditor.getWrapper();
       let components = myEditor.getComponents();
       let style = myEditor.getStyle();
-      //console.log("getComponentIds:" + getComponentIds(components));
       setComponentIds(components);
 
+      localTS += 1;
       let id = wrapper.get('attributes').id;
       let op = {
         action: 'copy-wrapper',
@@ -115,6 +119,7 @@ const onMessageReceived = async payload => {
 
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
+        console.log('state: Synced');
       }
     }
   } else if (StoC_msg.type === 'LEAVE') {
@@ -142,6 +147,7 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'OP') {
+    console.log('ClientState: ' + ClientState);
     //--------------------------- State: Synced -----------------------------
     if (ClientState == ClientStateEnum.Synced) {
       /***** ApplyRemoteOp *****/
@@ -185,6 +191,13 @@ const applyOp = (action, opts) => {
   if (action === 'delete-component') {
     ComponentDelete.run(myEditor.getModel().getEditor(), null, opts, 0);
   } else if (action === 'append-component') {
+    const droppable = myEditor.getModel().getCurrentFrame().droppable;
+    droppable.myMove(opts);
+    //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
+  } else if (action === 'move-component') {
+    const droppable = myEditor.getModel().getCurrentFrame().droppable;
+    droppable.myMove(opts);
+    //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'select-component') {
   } else if (action === 'copy-component') {
   } else if (action === 'update-content') {

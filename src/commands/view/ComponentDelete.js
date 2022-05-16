@@ -6,12 +6,10 @@ import {
   ApplyingLocalOp,
   ApplyingBufferedLocalOp,
 } from '../../utils/WebSocket';
-import CircularJSON from 'circular-json';
 import { myEditor } from '../..';
 
 export default {
   run(ed, sender, opts = {}, isLocalChange = 1) {
-    console.log('getWrapper: ' + JSON.stringify(myEditor.getWrapper()));
     console.log('command/view/ComponentDelete.js => run start');
     const toSelect = [];
     let components = opts.component || ed.getSelectedAll();
@@ -37,7 +35,7 @@ export default {
     console.log('command/view/ComponentDelete.js => run end');
 
     if (isLocalChange) {
-      opts.component = CircularJSON.parse(CircularJSON.stringify(components));
+      opts.component = components;
       let op = {
         action: 'delete-component',
         opts: opts,

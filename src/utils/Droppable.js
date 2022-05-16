@@ -4,6 +4,7 @@
 
 import { on, off } from 'utils/mixins';
 import { bindAll, indexOf } from 'underscore';
+import { parse, stringify } from 'flatted';
 
 export default class Droppable {
   constructor(em, rootEl) {
@@ -92,6 +93,9 @@ export default class Droppable {
   handleDragEnter(ev) {
     const { em } = this;
     const dt = ev.dataTransfer;
+    console.log('dt', dt);
+    console.log('dt', stringify(dt));
+    console.log('dt', parse(stringify(dt)));
     this.updateCounter(1, ev);
     if (this.over) return;
     this.over = 1;
@@ -106,6 +110,7 @@ export default class Droppable {
 
     // Select the right drag provider
     if (em.inAbsoluteMode()) {
+      console.log('Droppable.js => handleDragEnter inAbsoluteMode');
       const wrapper = em.get('DomComponents').getWrapper();
       const target = wrapper.append({})[0];
       const dragger = em.get('Commands').run('core:component-drag', {
@@ -157,6 +162,7 @@ export default class Droppable {
     this.dragStop = dragStop;
     this.dragContent = dragContent;
     em.trigger('canvas:dragenter', dt, content);
+    console.log('utils/Droppable.js => handleDragEnter start');
   }
 
   handleDragEnd(model, dt) {
@@ -194,7 +200,6 @@ export default class Droppable {
     content && dragContent && dragContent(content);
     this.endDrop(!content, ev);
     console.log('utils/Droppable.js => handleDrop end');
-    let opts = new Object();
   }
 
   getContentByData(dt) {
@@ -240,5 +245,37 @@ export default class Droppable {
     em.trigger('canvas:dragdata', dt, result);
 
     return result;
+  }
+
+  myMove(opts = {}) {
+    const { em } = this;
+    const utils = em.get('Utils');
+    const canvas = em.get('Canvas');
+    const sorter = new utils.Sorter({
+      em,
+      wmargin: 1,
+      nested: 1,
+      canvasRelative: 1,
+      direction: 'a',
+      container: this.el,
+      placer: canvas.getPlacerEl(),
+      containerSel: '*',
+      itemSel: '*',
+      pfx: 'gjs-',
+      onEndMove: model => this.handleDragEnd(model, null),
+      document: this.el.ownerDocument,
+      ...(this.sortOpts || {}),
+    });
+    sorter.setDropContent(opts.dropContent);
+    sorter.startSort();
+    this.sorter = sorter;
+
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(opts.dst, 'text/html');
+    opts.dst = doc.body.firstChild;
+    console.log('dragStop start');
+    sorter.myMove(opts);
+    //sorter.move(dst, src, pos, opts, 0);
+    console.log('dragStop end');
   }
 }

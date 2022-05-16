@@ -2,6 +2,8 @@ import Backbone from 'backbone';
 import { isString, isFunction, isArray, result, each, bindAll } from 'underscore';
 import { on, off, matches, getElement, getPointerEvent, isTextNode, getModel } from 'utils/mixins';
 import { getComponentIds } from '../dom_components/model/Components';
+import { parse, stringify, toJSON } from 'flatted';
+import { ClientState, ClientStateEnum, setState, ApplyingLocalOp, ApplyingBufferedLocalOp } from './WebSocket';
 
 const $ = Backbone.$;
 
@@ -996,7 +998,7 @@ export default Backbone.View.extend({
     const container = this.getContainerEl();
     const onEndMove = this.onEndMove;
     const onEnd = this.onEnd;
-    const { target, lastPos } = this;
+    let { target, lastPos } = this;
     let srcModel;
     off(container, 'mousemove dragover', this.onMove);
     off(docs, 'mouseup dragend touchend', this.endMove);
@@ -1041,23 +1043,32 @@ export default Backbone.View.extend({
     console.log('utils/Sorter.js => endMove end');
   },
 
-  /**
-   * Move component to new position
-   * @param {HTMLElement} dst Destination target
-   * @param {HTMLElement} src Element to move
-   * @param {Object} pos Object with position coordinates
-   * */
-  move(dst, src, pos) {
-    console.log('utils/Sorter.js move start');
+  myMove(paramOpts) {
+    const domc = this.em.get('DomComponents');
     const { em, dropContent } = this;
+    let dst = paramOpts.dst;
+    let src = paramOpts.src;
+    let pos = paramOpts.pos;
+    let trgModel = this.getTargetModel(dst);
+    console.log('----1');
+    let srcModel = src ? domc.getById(src.attributes.id) : null;
+    let draggable = paramOpts.draggable;
+    let droppable = paramOpts.droppable;
+    console.log('----2');
     const srcEl = getElement(src);
     const warns = [];
     const index = pos.method === 'after' ? pos.indexEl + 1 : pos.indexEl;
-    const validResult = this.validTarget(dst, srcEl);
-    const targetCollection = $(dst).data('collection');
-    const { trgModel, srcModel, draggable } = validResult;
-    const droppable = trgModel instanceof Backbone.Collection ? 1 : validResult.droppable;
+    let validResult;
     let modelToDrop, created;
+
+    if (srcModel) {
+      srcModel.set('status', '');
+      srcModel.set('status', 'selected');
+    }
+
+    dst.classList.remove('gjs-selected-parent');
+    let targetCollection = $(this.document.getElementById(paramOpts.dst.id)).data('collection');
+    console.log('----4');
 
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
@@ -1082,6 +1093,122 @@ export default Backbone.View.extend({
       }
 
       if (modelToDrop) {
+        console.log('2!!');
+        if (isTextable) {
+          delete opts.at;
+          created = trgModel.getView().insertComponent(modelToDrop, opts);
+        } else {
+          // add modelToDrop at index opts.at of targetCollection
+          created = targetCollection.add(modelToDrop, opts);
+        }
+      }
+
+      this.dropContent = null;
+      this.prevTarget = null; // This will recalculate children dimensions
+    } else if (em) {
+      const dropInfo = paramOpts.dropInfo || trgModel?.get('droppable');
+      const dragInfo = paramOpts.dragInfo || srcModel?.get('draggable');
+
+      !targetCollection && warns.push('Target collection not found');
+      !droppable && dropInfo && warns.push(`Target is not droppable, accepts [${dropInfo}]`);
+      !draggable && dragInfo && warns.push(`Component not draggable, acceptable by [${dragInfo}]`);
+      em.logWarning('Invalid target position', {
+        errors: warns,
+        model: srcModel,
+        context: 'sorter',
+        target: trgModel,
+      });
+    }
+
+    em?.trigger('sorter:drag:end', {
+      targetCollection,
+      modelToDrop,
+      warns,
+      validResult,
+      dst,
+      srcEl,
+    });
+    console.log('utils/Sorter.js move end');
+    return created;
+  },
+
+  /**
+   * Move component to new position
+   * @param {HTMLElement} dst Destination target
+   * @param {HTMLElement} src Element to move
+   * @param {Object} pos Object with position coordinates
+   * */
+  move(dst, src, pos) {
+    console.log('Sorter.js => move start');
+    let { em, dropContent } = this;
+
+    const srcEl = getElement(src);
+    const warns = [];
+    const index = pos.method === 'after' ? pos.indexEl + 1 : pos.indexEl;
+    const validResult = this.validTarget(dst, srcEl);
+    const { trgModel, srcModel, draggable } = validResult;
+
+    console.log('srcModel:', srcModel);
+    console.log('srcModel:', stringify(srcModel));
+    console.log('srcModel:', parse(stringify(srcModel)));
+
+    const targetCollection = $(dst).data('collection');
+
+    const droppable = trgModel instanceof Backbone.Collection ? 1 : validResult.droppable;
+    let modelToDrop, created;
+
+    let tmpNode = document.createElement('div');
+    tmpNode.appendChild(dst.cloneNode());
+    let dstString = tmpNode.innerHTML;
+    if (src) {
+      console.log('src', src);
+      console.log('src: ' + stringify(src));
+      console.log('src: ', parse(stringify(src)));
+      /*
+      tmpNode = document.createElement('div')
+      tmpNode.appendChild(src.cloneNode()) 
+      srcString = tmpNode.innerHTML;*/
+    }
+
+    let op = {};
+
+    let opOpts = {
+      dst: dstString,
+      src: src,
+      pos: pos,
+      dropContent: parse(stringify(dropContent)),
+      draggable: draggable,
+      droppable: droppable,
+      dragInfo: validResult.dragInfo,
+      dropInfo: validResult.dropInfo,
+    };
+
+    if (targetCollection && droppable && draggable) {
+      const opts = { at: index, action: 'move-component' };
+      op.action = 'move-component';
+      const isTextable = this.isTextableActive(srcModel, trgModel);
+
+      if (!dropContent) {
+        const srcIndex = srcModel.collection.indexOf(srcModel);
+        const sameCollection = targetCollection === srcModel.collection;
+        const sameIndex = srcIndex === index || srcIndex === index - 1;
+        const canRemove = !sameCollection || !sameIndex || isTextable;
+
+        if (canRemove) {
+          modelToDrop = srcModel.collection.remove(srcModel, { temporary: true });
+          if (sameCollection && index > srcIndex) {
+            opts.at = index - 1;
+          }
+        }
+      } else {
+        modelToDrop = isFunction(dropContent) ? dropContent() : dropContent;
+        opts.avoidUpdateStyle = true;
+        opts.action = 'add-component';
+        op.action = 'move-component';
+      }
+
+      if (modelToDrop) {
+        console.log('2!!');
         if (isTextable) {
           delete opts.at;
           created = trgModel.getView().insertComponent(modelToDrop, opts);
@@ -1117,6 +1244,19 @@ export default Backbone.View.extend({
       srcEl,
     });
     console.log('utils/Sorter.js move end');
+
+    op.opts = opOpts;
+    if (ClientState == ClientStateEnum.Synced) {
+      // set state to ApplyingLocalOp
+      setState(ClientStateEnum.ApplyingLocalOp);
+      // increase localTS and set localOp
+      ApplyingLocalOp(op);
+    } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+      // set state to ApplyingBufferedLocalOp
+      setState(ClientStateEnum.ApplyingBufferedLocalOp);
+      // push the op to buffer
+      ApplyingBufferedLocalOp(op);
+    }
     return created;
   },
 
