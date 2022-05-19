@@ -1,6 +1,8 @@
 import { View } from 'common';
 import { bindAll, isUndefined, debounce } from 'underscore';
 import { isObject } from 'utils/mixins';
+import { parse, stringify } from 'flatted';
+import { myEditor } from '../..';
 
 const clearProp = 'data-clear-style';
 
@@ -125,6 +127,14 @@ export default class Property extends View {
     ev && ev.stopPropagation();
     // Skip the default update in case a custom emit method is defined
     if (this.emit) return;
+    console.log('model:', this.model);
+    console.log('model:', stringify(this.model));
+    console.log('model:', parse(stringify(this.model)));
+    console.log('target', ev.target.value);
+    console.log('id:', this.model.getId());
+    /*const temp = myEditor.getModel().get('DomComponents').getById(this.model.getId());
+    console.log("component", temp)
+    console.log("component model", temp.getModel());*/
     this.model.upValue(ev.target.value);
     console.log('PropertyView.js => inputValueChanged end');
   }

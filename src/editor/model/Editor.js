@@ -400,14 +400,21 @@ export default class EditorModel extends Model {
     const models = isArray(model) ? model : [model];
 
     models.forEach(model => {
+      console.log('model', model);
       if (model && !model.get('selectable')) return;
       const selected = this.get('selected');
       opts.forceChange && this.removeSelected(model, opts);
       selected.addComponent(model, opts);
       model && this.trigger('component:select', model, opts);
     });
-    console.log('Editor.js => addSelected end');
   }
+
+  /*
+    let id = "iq9z"
+    let temp = this.get('DomComponents').getById(id)
+    temp.set('status', 'selected');
+    console.log('Editor.js => addSelected end'); 
+  */
 
   /**
    * Remove component from selection

@@ -1,5 +1,13 @@
 import Backbone from 'backbone';
 import { isUndefined } from 'underscore';
+import { myEditor } from '../..';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 export default Backbone.Model.extend({
   defaults: {
@@ -63,14 +71,34 @@ export default Backbone.Model.extend({
     return !isUndefined(value) ? value : '';
   },
 
+  /*
+  applyUpdateTrait(opts){  
+    const name = opts.name
+    if (isUndefined(opts.value)) return;
+    let valueToSet = opts.value;
+
+    if (opts.value === 'false') {
+      valueToSet = false;
+    } else if (opts.value === 'true') {
+      valueToSet = true;
+    }
+
+    let target = myEditor.getModel().get('DomComponents').getById(opts.id);
+
+    if (opts.changeProp) {
+      target.set(name, valueToSet, opts.opts);
+    } else {
+      const attrs = { ...target.get('attributes') };
+      attrs[name] = valueToSet;
+      target.set('attributes', attrs, opts.opts);
+    }
+  },*/
+
   setTargetValue(value, opts = {}) {
     console.log('trait_manager/model/Trait.js => setTargetValue start');
     const target = this.target;
+
     const name = this.get('name');
-    console.log('value: ' + JSON.stringify(value));
-    console.log('opts: ' + JSON.stringify(opts));
-    console.log('target: ' + JSON.stringify(target));
-    console.log('name: ' + JSON.stringify(name));
     if (isUndefined(value)) return;
     let valueToSet = value;
 

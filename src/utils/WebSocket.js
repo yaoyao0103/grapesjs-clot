@@ -4,8 +4,8 @@ import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
 import { setComponentIds } from '../dom_components/model/Components';
-// op apply
-import ComponentDelete from '../commands/view/ComponentDelete';
+
+import { applyDeleteComponent, applyUpdateTrait, applyUpdateContent } from './applyOp.js';
 
 export var stompClient = null;
 var username = '';
@@ -188,21 +188,25 @@ const onMessageReceived = async payload => {
 };
 
 const applyOp = (action, opts) => {
+  const droppable = myEditor.getModel().getCurrentFrame().droppable;
   if (action === 'delete-component') {
-    ComponentDelete.run(myEditor.getModel().getEditor(), null, opts, 0);
+    applyDeleteComponent(myEditor.getModel().getEditor(), opts);
   } else if (action === 'append-component') {
-    const droppable = myEditor.getModel().getCurrentFrame().droppable;
-    droppable.myMove(opts);
+    droppable.applyAppendOrMoveComponent(opts);
+    let components = myEditor.getComponents();
+    setComponentIds(components);
     //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'move-component') {
-    const droppable = myEditor.getModel().getCurrentFrame().droppable;
-    droppable.myMove(opts);
+    droppable.applyAppendOrMoveComponent(opts);
     //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'select-component') {
   } else if (action === 'copy-component') {
   } else if (action === 'update-content') {
+    applyUpdateContent(opts);
   } else if (action === 'update-trait') {
+    applyUpdateTrait(opts);
   } else if (action === 'update-style') {
+    myEditor.getModel().get('StyleManager').applyUpdateStyle(opts);
   }
 };
 

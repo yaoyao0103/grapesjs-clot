@@ -20,6 +20,15 @@ export const setComponentIds = cmp => {
   });
 };
 
+export const setComponentIdsWithArray = (cmp, idArray) => {
+  const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
+  cmps.map(cmp => {
+    let id = idArray.shift();
+    cmp.set('attributes', { id: id });
+    setComponentIdsWithArray(cmp.components().models, idArray);
+  });
+};
+
 const getComponentsFromDefs = (items, all = {}, opts = {}) => {
   const itms = isArray(items) ? items : [items];
 

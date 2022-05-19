@@ -1,6 +1,16 @@
 import Backbone from 'backbone';
 import { isUndefined, isString, isFunction } from 'underscore';
 import { capitalize } from 'utils/mixins';
+import { parse, stringify } from 'flatted';
+import CircularJSON from 'circular-json';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
+import { myEditor } from '../..';
 
 const $ = Backbone.$;
 
@@ -79,14 +89,48 @@ export default Backbone.View.extend({
   onChange(event) {
     console.log('TraitView.js => onChange start');
     const el = this.getInputElem();
+    let id = this.em.getSelected().getId();
+    let target = this.em.get('DomComponents').getById(id);
+    let traits = target.getTraits();
+    let cid = this.model.cid;
+    let traitIndex = 0;
+    for (let i = 0; i < traits.length; i++) {
+      if (traits[i].cid == cid) {
+        traitIndex = i;
+        break;
+      }
+    }
+
     if (el && !isUndefined(el.value)) {
       this.model.set('value', el.value);
     }
+
     this.onEvent({
       ...this.getClbOpts(),
       event,
     });
+
     console.log('TraitView.js => onChange end');
+    let opOpts = {
+      id: id,
+      traitIndex: traitIndex,
+      value: el.value,
+    };
+    let op = {
+      action: 'update-trait',
+      opts: opOpts,
+    };
+    if (ClientState == ClientStateEnum.Synced) {
+      // set state to ApplyingLocalOp
+      setState(ClientStateEnum.ApplyingLocalOp);
+      // increase localTS and set localOp
+      ApplyingLocalOp(op);
+    } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+      // set state to ApplyingBufferedLocalOp
+      setState(ClientStateEnum.ApplyingBufferedLocalOp);
+      // push the op to buffer
+      ApplyingBufferedLocalOp(op);
+    }
   },
 
   getValueForTarget() {
@@ -109,7 +153,6 @@ export default Backbone.View.extend({
       this.postUpdate();
     } else {
       const val = this.getValueForTarget();
-      console.log('model: ' + JSON.stringify(model));
       model.setTargetValue(val, opts);
     }
     console.log('trait_manager/view/TraitView.js => onValueChange end');

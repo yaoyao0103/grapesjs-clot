@@ -247,7 +247,8 @@ export default class Droppable {
     return result;
   }
 
-  myMove(opts = {}) {
+  // be called when applying remote op
+  applyAppendOrMoveComponent(opts = {}) {
     const { em } = this;
     const utils = em.get('Utils');
     const canvas = em.get('Canvas');
@@ -266,6 +267,7 @@ export default class Droppable {
       document: this.el.ownerDocument,
       ...(this.sortOpts || {}),
     });
+    console.log('dropContent', opts.dropContent);
     sorter.setDropContent(opts.dropContent);
     sorter.startSort();
     this.sorter = sorter;
@@ -275,7 +277,6 @@ export default class Droppable {
     opts.dst = doc.body.firstChild;
     console.log('dragStop start');
     sorter.myMove(opts);
-    //sorter.move(dst, src, pos, opts, 0);
     console.log('dragStop end');
   }
 }

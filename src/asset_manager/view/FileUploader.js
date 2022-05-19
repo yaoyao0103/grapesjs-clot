@@ -33,10 +33,7 @@ export default Backbone.View.extend(
       this.ppfx = c.pStylePrefix || '';
       this.target = this.options.globalCollection || {};
       this.uploadId = this.pfx + 'uploadFile';
-      this.disabled =
-        c.disableUpload !== undefined
-          ? c.disableUpload
-          : !c.upload && !c.embedAsBase64;
+      this.disabled = c.disableUpload !== undefined ? c.disableUpload : !c.upload && !c.embedAsBase64;
       this.multiUpload = c.multiUpload !== undefined ? c.multiUpload : true;
       this.events['change #' + this.uploadId] = 'uploadFile';
       let uploadFile = c.uploadFile;
@@ -115,6 +112,7 @@ export default Backbone.View.extend(
      * */
     uploadFile(e, clb) {
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+      console.log('FileUploader.js => uploadFile files:', files);
       const { config } = this;
       const { beforeUpload } = config;
 
@@ -151,18 +149,14 @@ export default Backbone.View.extend(
           method: 'post',
           credentials: config.credentials || 'include',
           headers,
-          body
+          body,
         };
         const fetchResult = customFetch
           ? customFetch(url, fetchOpts)
           : fetch(url, fetchOpts).then(res =>
-              ((res.status / 200) | 0) == 1
-                ? res.text()
-                : res.text().then(text => Promise.reject(text))
+              ((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))
             );
-        return fetchResult
-          .then(text => this.onUploadResponse(text, clb))
-          .catch(err => this.onUploadError(err));
+        return fetchResult.then(text => this.onUploadResponse(text, clb)).catch(err => this.onUploadError(err));
       }
     },
 
@@ -176,15 +170,15 @@ export default Backbone.View.extend(
         this.uploadForm = this.$el.find('form').get(0);
         if ('draggable' in this.uploadForm) {
           var uploadFile = this.uploadFile;
-          this.uploadForm.ondragover = function() {
+          this.uploadForm.ondragover = function () {
             this.className = that.pfx + 'hover';
             return false;
           };
-          this.uploadForm.ondragleave = function() {
+          this.uploadForm.ondragleave = function () {
             this.className = '';
             return false;
           };
-          this.uploadForm.ondrop = function(e) {
+          this.uploadForm.ondrop = function (e) {
             this.className = '';
             e.preventDefault();
             that.uploadFile(e);
@@ -233,7 +227,7 @@ export default Backbone.View.extend(
             onSelect() {
               editor.Modal.close();
               editor.AssetManager.setTarget(null);
-            }
+            },
           });
         }
 
@@ -260,25 +254,23 @@ export default Backbone.View.extend(
           uploadId: this.uploadId,
           disabled: this.disabled,
           multiUpload: this.multiUpload,
-          pfx
+          pfx,
         })
       );
       this.initDrop();
       $el.attr('class', pfx + 'file-uploader');
       return this;
-    }
+    },
   },
   {
-    embedAsBase64: function(e, clb) {
+    embedAsBase64: function (e, clb) {
       // List files dropped
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
       const response = { data: [] };
 
       // Unlikely, widely supported now
       if (!FileReader) {
-        this.onUploadError(
-          new Error('Unsupported platform, FileReader is not defined')
-        );
+        this.onUploadError(new Error('Unsupported platform, FileReader is not defined'));
         return;
       }
 
@@ -329,7 +321,7 @@ export default Backbone.View.extend(
                 name,
                 type,
                 height: 0,
-                width: 0
+                width: 0,
               };
 
               const image = new Image();
@@ -347,7 +339,7 @@ export default Backbone.View.extend(
               resolve({
                 src: reader.result,
                 name,
-                type
+                type,
               });
             } else {
               // No type found, resolve with the URL only
@@ -376,6 +368,6 @@ export default Backbone.View.extend(
           this.onUploadError(error);
         }
       );
-    }
+    },
   }
 );

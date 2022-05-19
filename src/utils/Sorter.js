@@ -1,7 +1,7 @@
 import Backbone from 'backbone';
 import { isString, isFunction, isArray, result, each, bindAll } from 'underscore';
 import { on, off, matches, getElement, getPointerEvent, isTextNode, getModel } from 'utils/mixins';
-import { getComponentIds } from '../dom_components/model/Components';
+import { getComponentIds, setComponentIds, setComponentIdsWithArray } from '../dom_components/model/Components';
 import { parse, stringify, toJSON } from 'flatted';
 import { ClientState, ClientStateEnum, setState, ApplyingLocalOp, ApplyingBufferedLocalOp } from './WebSocket';
 
@@ -1050,11 +1050,9 @@ export default Backbone.View.extend({
     let src = paramOpts.src;
     let pos = paramOpts.pos;
     let trgModel = this.getTargetModel(dst);
-    console.log('----1');
     let srcModel = src ? domc.getById(src.attributes.id) : null;
     let draggable = paramOpts.draggable;
     let droppable = paramOpts.droppable;
-    console.log('----2');
     const srcEl = getElement(src);
     const warns = [];
     const index = pos.method === 'after' ? pos.indexEl + 1 : pos.indexEl;
@@ -1068,7 +1066,6 @@ export default Backbone.View.extend({
 
     dst.classList.remove('gjs-selected-parent');
     let targetCollection = $(this.document.getElementById(paramOpts.dst.id)).data('collection');
-    console.log('----4');
 
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
@@ -1093,7 +1090,6 @@ export default Backbone.View.extend({
       }
 
       if (modelToDrop) {
-        console.log('2!!');
         if (isTextable) {
           delete opts.at;
           created = trgModel.getView().insertComponent(modelToDrop, opts);
@@ -1103,6 +1099,8 @@ export default Backbone.View.extend({
         }
       }
 
+      // set ids on the new component
+      setComponentIdsWithArray(created, paramOpts.idArray);
       this.dropContent = null;
       this.prevTarget = null; // This will recalculate children dimensions
     } else if (em) {
@@ -1148,10 +1146,6 @@ export default Backbone.View.extend({
     const validResult = this.validTarget(dst, srcEl);
     const { trgModel, srcModel, draggable } = validResult;
 
-    console.log('srcModel:', srcModel);
-    console.log('srcModel:', stringify(srcModel));
-    console.log('srcModel:', parse(stringify(srcModel)));
-
     const targetCollection = $(dst).data('collection');
 
     const droppable = trgModel instanceof Backbone.Collection ? 1 : validResult.droppable;
@@ -1160,15 +1154,6 @@ export default Backbone.View.extend({
     let tmpNode = document.createElement('div');
     tmpNode.appendChild(dst.cloneNode());
     let dstString = tmpNode.innerHTML;
-    if (src) {
-      console.log('src', src);
-      console.log('src: ' + stringify(src));
-      console.log('src: ', parse(stringify(src)));
-      /*
-      tmpNode = document.createElement('div')
-      tmpNode.appendChild(src.cloneNode()) 
-      srcString = tmpNode.innerHTML;*/
-    }
 
     let op = {};
 
@@ -1182,6 +1167,8 @@ export default Backbone.View.extend({
       dragInfo: validResult.dragInfo,
       dropInfo: validResult.dropInfo,
     };
+
+    let idArray;
 
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
@@ -1218,6 +1205,11 @@ export default Backbone.View.extend({
         }
       }
 
+      // set new component
+      setComponentIds(created);
+      // get the ids of the new components
+      idArray = getComponentIds(created);
+
       this.dropContent = null;
       this.prevTarget = null; // This will recalculate children dimensions
     } else if (em) {
@@ -1245,6 +1237,7 @@ export default Backbone.View.extend({
     });
     console.log('utils/Sorter.js move end');
 
+    opOpts.idArray = idArray;
     op.opts = opOpts;
     if (ClientState == ClientStateEnum.Synced) {
       // set state to ApplyingLocalOp

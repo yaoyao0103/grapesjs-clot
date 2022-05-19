@@ -35,7 +35,6 @@ export default class Property extends Model {
   }
 
   __upTargets(p, opts = {}) {
-    console.log('style_manager/model/Property.js => __upTargets start');
     const { em } = this;
     const sm = em.get('StyleManager');
     const name = this.getName();
@@ -57,7 +56,6 @@ export default class Property extends Model {
     sm.__trgEv(sm.events.propertyUpdate, evOpts);
     onChange && onChange(evOpts);
     applyStyle && this.__upTargetsStyle({ [name]: value }, opts);
-    console.log('style_manager/model/Property.js => __upTargets end');
   }
 
   __upTargetsStyle(style, opts) {

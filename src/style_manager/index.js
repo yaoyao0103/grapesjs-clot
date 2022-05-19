@@ -73,6 +73,9 @@ import Sectors from './model/Sectors';
 import Properties from './model/Properties';
 import PropertyFactory from './model/PropertyFactory';
 import SectorsView from './view/SectorsView';
+import { parse, stringify } from 'flatted';
+import { myEditor } from '..';
+import { ClientState, ClientStateEnum, setState, ApplyingLocalOp, ApplyingBufferedLocalOp } from '../utils/WebSocket';
 
 export const evAll = 'style';
 export const evPfx = `${evAll}:`;
@@ -412,6 +415,12 @@ export default () => {
       return this.model.get('stateTarget') || null;
     },
 
+    // be called when applying remote op
+    applyUpdateStyle(opts) {
+      let target = myEditor.getModel().get('DomComponents').getById(opts.id);
+      target.addStyle(opts.style, opts.opts);
+    },
+
     /**
      * Update selected targets with a custom style.
      * @param {Object} style Style object
@@ -428,8 +437,31 @@ export default () => {
       // Update state rule
       const target = this.getSelected();
       const targetState = this.__getStateTarget();
+      let id = parse(stringify(target)).selectors[0].substring(1);
+
       target && targetState?.setStyle(target.getStyle(), opts);
       console.log('style_manager/index.js => addStyleTargets end');
+
+      let opOpts = {
+        id: id,
+        style: style,
+        opts: opts,
+      };
+      let op = {
+        action: 'update-style',
+        opts: opOpts,
+      };
+      if (ClientState == ClientStateEnum.Synced) {
+        // set state to ApplyingLocalOp
+        setState(ClientStateEnum.ApplyingLocalOp);
+        // increase localTS and set localOp
+        ApplyingLocalOp(op);
+      } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+        // set state to ApplyingBufferedLocalOp
+        setState(ClientStateEnum.ApplyingBufferedLocalOp);
+        // push the op to buffer
+        ApplyingBufferedLocalOp(op);
+      }
     },
 
     /**

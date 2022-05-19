@@ -1,9 +1,15 @@
 import { on, off, getModel } from 'utils/mixins';
 import ComponentView from './ComponentView';
 import { bindAll } from 'underscore';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 const compProt = ComponentView.prototype;
-var CircularJSON = require('circular-json');
 
 export default ComponentView.extend({
   events: {
@@ -135,12 +141,20 @@ export default ComponentView.extend({
   syncContent(opts = {}) {
     console.log('dom_components/view/ComponentTextView.js => syncContent start');
     const { model, rte, rteEnabled } = this;
-    //console.log("opts: " + CircularJSON.stringify(opts));
     if (!rteEnabled && !opts.force) return;
     const content = this.getContent();
     const comps = model.components();
     const contentOpt = { fromDisable: 1, ...opts };
     model.set('content', '', contentOpt);
+
+    let id = model.getId();
+    let opOpts = {
+      id: id,
+      rteCustomRte: rte.customRte,
+      rteEnabled: rteEnabled,
+      content: content,
+      opts: opts,
+    };
 
     // If there is a custom RTE the content is just baked staticly
     // inside 'content'
@@ -151,6 +165,21 @@ export default ComponentView.extend({
       comps.resetFromString(content, opts);
     }
     console.log('dom_components/view/ComponentTextView.js => syncContent end');
+    let op = {
+      action: 'update-content',
+      opts: opOpts,
+    };
+    if (ClientState == ClientStateEnum.Synced) {
+      // set state to ApplyingLocalOp
+      setState(ClientStateEnum.ApplyingLocalOp);
+      // increase localTS and set localOp
+      ApplyingLocalOp(op);
+    } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+      // set state to ApplyingBufferedLocalOp
+      setState(ClientStateEnum.ApplyingBufferedLocalOp);
+      // push the op to buffer
+      ApplyingBufferedLocalOp(op);
+    }
   },
 
   insertComponent(content, opts = {}) {
