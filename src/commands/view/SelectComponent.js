@@ -330,7 +330,9 @@ export default {
       const customeLabel = config.customBadgeLabel;
       const badgeLabel = `${icon ? `<div class="${clsBadge}__icon">${icon}</div>` : ''}
         <div class="${clsBadge}__name">${model.getName()}</div>`;
-      badge.innerHTML = customeLabel ? customeLabel(model) : badgeLabel;
+      const username = model.get('chooser');
+      badge.innerHTML =
+        model.get('status') == 'freezed-remote-selected' ? username : customeLabel ? customeLabel(model) : badgeLabel;
     }
 
     const un = 'px';

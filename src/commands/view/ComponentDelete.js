@@ -6,7 +6,6 @@ import {
   ApplyingLocalOp,
   ApplyingBufferedLocalOp,
 } from '../../utils/WebSocket';
-import { setComponentIds } from '../../dom_components/model/Components';
 
 export default {
   run(ed, sender, opts = {}) {

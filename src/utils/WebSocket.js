@@ -5,7 +5,13 @@ import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
 import { setComponentIds } from '../dom_components/model/Components';
 
-import { applyDeleteComponent, applyUpdateTrait, applyUpdateContent } from './applyOp.js';
+import {
+  applyDeleteComponent,
+  applyUpdateTrait,
+  applyUpdateContent,
+  applyAddSelected,
+  applyRemoveSelected,
+} from './applyOp.js';
 
 export var stompClient = null;
 var username = '';
@@ -200,6 +206,9 @@ const applyOp = (action, opts) => {
     droppable.applyAppendOrMoveComponent(opts);
     //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'select-component') {
+    applyAddSelected(opts);
+  } else if (action === 'unselect-component') {
+    applyRemoveSelected(opts);
   } else if (action === 'copy-component') {
   } else if (action === 'update-content') {
     applyUpdateContent(opts);

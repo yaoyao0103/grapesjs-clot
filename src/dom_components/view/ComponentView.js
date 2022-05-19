@@ -185,6 +185,7 @@ export default Backbone.View.extend({
     const selectedCls = `${ppfx}selected`;
     const selectedParentCls = `${selectedCls}-parent`;
     const freezedCls = `${ppfx}freezed`;
+    const remoteCls = `${ppfx}remote`;
     const hoveredCls = `${ppfx}hovered`;
     const toRemove = [selectedCls, selectedParentCls, freezedCls, hoveredCls];
     const selCls = extHl && !opts.noExtHl ? '' : selectedCls;
@@ -204,6 +205,9 @@ export default Backbone.View.extend({
         break;
       case 'freezed-selected':
         cls = `${actualCls} ${freezedCls} ${selCls}`;
+        break;
+      case 'freezed-remote-selected':
+        cls = `${actualCls} ${freezedCls} ${remoteCls} ${selCls} `;
         break;
       case 'hovered':
         cls = !opts.avoidHover ? `${actualCls} ${hoveredCls}` : '';

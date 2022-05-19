@@ -5,6 +5,13 @@ import Extender from 'utils/extender';
 import { getModel, hasWin } from 'utils/mixins';
 import { Model } from 'common';
 import Selected from './Selected';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 Backbone.$ = $;
 
@@ -400,21 +407,35 @@ export default class EditorModel extends Model {
     const models = isArray(model) ? model : [model];
 
     models.forEach(model => {
-      console.log('model', model);
       if (model && !model.get('selectable')) return;
       const selected = this.get('selected');
       opts.forceChange && this.removeSelected(model, opts);
       selected.addComponent(model, opts);
       model && this.trigger('component:select', model, opts);
+
+      if (model) {
+        let opOpts = {
+          id: model.getId(),
+          username: 'user1',
+        };
+        let op = {
+          action: 'select-component',
+          opts: opOpts,
+        };
+        if (ClientState == ClientStateEnum.Synced) {
+          // set state to ApplyingLocalOp
+          setState(ClientStateEnum.ApplyingLocalOp);
+          // increase localTS and set localOp
+          ApplyingLocalOp(op);
+        } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+          // set state to ApplyingBufferedLocalOp
+          setState(ClientStateEnum.ApplyingBufferedLocalOp);
+          // push the op to buffer
+          ApplyingBufferedLocalOp(op);
+        }
+      }
     });
   }
-
-  /*
-    let id = "iq9z"
-    let temp = this.get('DomComponents').getById(id)
-    temp.set('status', 'selected');
-    console.log('Editor.js => addSelected end'); 
-  */
 
   /**
    * Remove component from selection
@@ -424,8 +445,32 @@ export default class EditorModel extends Model {
    */
   removeSelected(el, opts = {}) {
     console.log('Editor.js => removeSelected start');
-    this.get('selected').removeComponent(getModel(el, $), opts);
+    const model = getModel(el, $);
+    const models = isArray(model) ? model : [model];
+    this.get('selected').removeComponent(model, opts);
     console.log('Editor.js => removeSelected end');
+    models.forEach(model => {
+      if (model) {
+        let opOpts = {
+          id: model.getId(),
+        };
+        let op = {
+          action: 'unselect-component',
+          opts: opOpts,
+        };
+        if (ClientState == ClientStateEnum.Synced) {
+          // set state to ApplyingLocalOp
+          setState(ClientStateEnum.ApplyingLocalOp);
+          // increase localTS and set localOp
+          ApplyingLocalOp(op);
+        } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+          // set state to ApplyingBufferedLocalOp
+          setState(ClientStateEnum.ApplyingBufferedLocalOp);
+          // push the op to buffer
+          ApplyingBufferedLocalOp(op);
+        }
+      }
+    });
   }
 
   /**

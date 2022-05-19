@@ -1976,6 +1976,7 @@ Component.prototype.defaults = {
   void: false,
   state: '', // Indicates if the component is in some CSS state like ':hover', ':active', etc.
   status: '', // State, eg. 'selected'
+  chooser: '',
   content: '',
   icon: '',
   style: '',

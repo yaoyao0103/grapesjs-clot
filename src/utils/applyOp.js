@@ -73,7 +73,14 @@ export const applyUpdateContent = opts => {
   }
 };
 
-export const applySetSelected = opts => {
+export const applyAddSelected = opts => {
   let model = myEditor.getModel().get('DomComponents').getById(opts.id);
-  model.set('status', 'selected');
+  model.set('status', 'freezed-remote-selected');
+  model.set('chooser', opts.username);
+};
+
+export const applyRemoveSelected = opts => {
+  let model = myEditor.getModel().get('DomComponents').getById(opts.id);
+  model.set('status', '');
+  model.set('chooser', '');
 };
