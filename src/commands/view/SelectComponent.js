@@ -271,7 +271,7 @@ export default {
    * @private
    */
   onClick(ev) {
-    console.log('commands/view/SelectComponent.js => onClick start');
+    //console.log('commands/view/SelectComponent.js => onClick start');
     ev.stopPropagation();
     ev.preventDefault();
     const { em } = this;
@@ -294,7 +294,7 @@ export default {
       }
       this.select(model, ev);
     }
-    console.log('commands/view/SelectComponent.js => onClick end');
+    //console.log('commands/view/SelectComponent.js => onClick end');
   },
 
   /**
@@ -303,11 +303,11 @@ export default {
    * @param  {Event} event
    */
   select(model, event = {}) {
-    console.log('commands/view/SelectComponent.js => select start');
+    //console.log('commands/view/SelectComponent.js => select start');
     if (!model) return;
     this.editor.select(model, { event, useValid: true });
     this.initResize(model);
-    console.log('commands/view/SelectComponent.js => select end');
+    //console.log('commands/view/SelectComponent.js => select end');
   },
 
   /**

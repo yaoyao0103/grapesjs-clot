@@ -51,7 +51,7 @@ export default {
    * })
    */
   init(config = {}) {
-    console.log('index.js/init()--start');
+    //console.log('index.js/init()--start');
     if (!stompClient) connectWebSocket();
     const { headless } = config;
     const els = config.container;
@@ -95,7 +95,7 @@ export default {
     wrapper.set('attributes', { id: 'Hello!' });
     myEditor = editor;
     myCurrentFrame = myEditor.getModel().getCurrentFrame();
-    console.log('index.js/init()--end');
+    //console.log('index.js/init()--end');
     return editor;
   },
 };

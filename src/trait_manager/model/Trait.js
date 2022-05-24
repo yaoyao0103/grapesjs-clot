@@ -95,7 +95,7 @@ export default Backbone.Model.extend({
   },*/
 
   setTargetValue(value, opts = {}) {
-    console.log('trait_manager/model/Trait.js => setTargetValue start');
+    //console.log('trait_manager/model/Trait.js => setTargetValue start');
     const target = this.target;
 
     const name = this.get('name');
@@ -115,7 +115,7 @@ export default Backbone.Model.extend({
       attrs[name] = valueToSet;
       target.set('attributes', attrs, opts);
     }
-    console.log('trait_manager/model/Trait.js => setTargetValue end');
+    //console.log('trait_manager/model/Trait.js => setTargetValue end');
   },
 
   setValueFromInput(value, final = 1, opts = {}) {

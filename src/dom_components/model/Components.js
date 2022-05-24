@@ -80,7 +80,7 @@ export default Backbone.Collection.extend({
   },
 
   resetFromString(input = '', opts = {}) {
-    console.log('dom_components/model/Components => resetFromString start');
+    //console.log('dom_components/model/Components => resetFromString start');
     opts.keepIds = getComponentIds(this);
     const { domc } = this;
     const allByID = domc?.allById() || {};
@@ -88,16 +88,14 @@ export default Backbone.Collection.extend({
     const cmps = isArray(parsed) ? parsed : [parsed];
     const newCmps = getComponentsFromDefs(cmps, allByID, opts);
     this.reset(newCmps, opts);
-    console.log('----------');
     this.em?.trigger('component:content', this.parent, opts, input);
-    console.log('**********');
-    console.log('dom_components/model/Components => resetFromString end');
+    //console.log('dom_components/model/Components => resetFromString end');
   },
 
   removeChildren(removed, coll, opts = {}) {
     // Removing a parent component can cause this function
     // to be called with an already removed child element
-    console.log('Components.js => removeChildren start');
+    //console.log('Components.js => removeChildren start');
     if (!removed) {
       return;
     }
@@ -145,7 +143,7 @@ export default Backbone.Collection.extend({
     em.stopListening(removed);
     em.stopListening(removed.get('classes'));
     removed.__postRemove();
-    console.log('Components.js => removeChildren end');
+    //console.log('Components.js => removeChildren end');
   },
 
   model(attrs, options) {
@@ -200,7 +198,7 @@ export default Backbone.Collection.extend({
 
   add(models, opt = {}) {
     //console.trace();
-    console.log('Components.js => add start');
+    //console.log('Components.js => add start');
     opt.keepIds = [...(opt.keepIds || []), ...getComponentIds(opt.previousModels)];
 
     if (isString(models)) {
@@ -221,7 +219,7 @@ export default Backbone.Collection.extend({
 
     const result = Backbone.Collection.prototype.add.apply(this, [models, opt]);
     this.__firstAdd = result;
-    console.log('Components.js => add end');
+    //console.log('Components.js => add end');
     return result;
   },
 
@@ -279,7 +277,7 @@ export default Backbone.Collection.extend({
   },
 
   onAdd(model, c, opts = {}) {
-    console.log('Components.js => onAdd start');
+    //console.log('Components.js => onAdd start');
     const { domc, em } = this;
     const style = model.getStyle();
     const avoidInline = em && em.getConfig('avoidInlineStyle');
@@ -294,7 +292,7 @@ export default Backbone.Collection.extend({
 
     model.__postAdd({ recursive: 1 });
     this.__onAddEnd();
-    console.log('Components.js => onAdd end');
+    //console.log('Components.js => onAdd end');
   },
 
   __onAddEnd: debounce(function () {

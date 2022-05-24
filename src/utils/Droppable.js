@@ -69,16 +69,13 @@ export default class Droppable {
   }
 
   endDrop(cancel, ev) {
-    console.log('utils/Droppable.js => endDrop start');
+    //console.log('utils/Droppable.js => endDrop start');
     const { em, dragStop } = this;
     this.counter = 0;
-    console.log('------------------------');
     dragStop && dragStop(cancel);
-    console.log('************************');
     this.__customTglEff(false);
-    console.log('/////////////////////////');
     em.trigger('canvas:dragend', ev);
-    console.log('utils/Droppable.js => endDrop end');
+    //console.log('utils/Droppable.js => endDrop end');
   }
 
   handleDragLeave(ev) {
@@ -93,9 +90,6 @@ export default class Droppable {
   handleDragEnter(ev) {
     const { em } = this;
     const dt = ev.dataTransfer;
-    console.log('dt', dt);
-    console.log('dt', stringify(dt));
-    console.log('dt', parse(stringify(dt)));
     this.updateCounter(1, ev);
     if (this.over) return;
     this.over = 1;
@@ -110,7 +104,6 @@ export default class Droppable {
 
     // Select the right drag provider
     if (em.inAbsoluteMode()) {
-      console.log('Droppable.js => handleDragEnter inAbsoluteMode');
       const wrapper = em.get('DomComponents').getWrapper();
       const target = wrapper.append({})[0];
       const dragger = em.get('Commands').run('core:component-drag', {
@@ -151,10 +144,10 @@ export default class Droppable {
       sorter.startSort();
       this.sorter = sorter;
       dragStop = cancel => {
-        console.log('dragStop start');
+        //console.log('dragStop start');
         cancel && (sorter.moved = 0);
         sorter.endMove();
-        console.log('dragStop end');
+        //console.log('dragStop end');
       };
       dragContent = content => sorter.setDropContent(content);
     }
@@ -162,11 +155,11 @@ export default class Droppable {
     this.dragStop = dragStop;
     this.dragContent = dragContent;
     em.trigger('canvas:dragenter', dt, content);
-    console.log('utils/Droppable.js => handleDragEnter start');
+    //console.log('utils/Droppable.js => handleDragEnter start');
   }
 
   handleDragEnd(model, dt) {
-    console.log('utils/Droppable.js => handleDragEnd start');
+    //console.log('utils/Droppable.js => handleDragEnd start');
     const { em } = this;
     this.over = 0;
     if (model) {
@@ -174,7 +167,7 @@ export default class Droppable {
       em.trigger('canvas:drop', dt, model);
     }
     em.runDefault({ preserveSelected: 1 });
-    console.log('utils/Droppable.js => handleDragEnd end');
+    //console.log('utils/Droppable.js => handleDragEnd end');
   }
 
   /**
@@ -191,7 +184,7 @@ export default class Droppable {
    * drop, accidentally, happens on some external element (DOM not inside the iframe)
    */
   handleDrop(ev) {
-    console.log('utils/Droppable.js => handleDrop start');
+    //console.log('utils/Droppable.js => handleDrop start');
     ev.preventDefault();
     const { dragContent } = this;
     const dt = ev.dataTransfer;
@@ -199,7 +192,7 @@ export default class Droppable {
     ev.target.style.border = '';
     content && dragContent && dragContent(content);
     this.endDrop(!content, ev);
-    console.log('utils/Droppable.js => handleDrop end');
+    //console.log('utils/Droppable.js => handleDrop end');
   }
 
   getContentByData(dt) {
@@ -267,7 +260,6 @@ export default class Droppable {
       document: this.el.ownerDocument,
       ...(this.sortOpts || {}),
     });
-    console.log('dropContent', opts.dropContent);
     sorter.setDropContent(opts.dropContent);
     sorter.startSort();
     this.sorter = sorter;
@@ -275,8 +267,8 @@ export default class Droppable {
     let parser = new DOMParser();
     let doc = parser.parseFromString(opts.dst, 'text/html');
     opts.dst = doc.body.firstChild;
-    console.log('dragStop start');
+    //console.log('dragStop start');
     sorter.myMove(opts);
-    console.log('dragStop end');
+    //console.log('dragStop end');
   }
 }

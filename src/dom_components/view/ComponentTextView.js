@@ -100,7 +100,7 @@ export default ComponentView.extend({
    * @private
    * */
   async disableEditing(opts = {}) {
-    console.log('dom_components/view/ComponentTextView.js => disableEditing start');
+    //console.log('dom_components/view/ComponentTextView.js => disableEditing start');
     const { model, rte, activeRte, em } = this;
 
     // There are rare cases when disableEditing is called when the view is already removed
@@ -121,7 +121,7 @@ export default ComponentView.extend({
     }
 
     this.toggleEvents();
-    console.log('dom_components/view/ComponentTextView.js => disableEditing end');
+    //console.log('dom_components/view/ComponentTextView.js => disableEditing end');
   },
 
   /**
@@ -139,7 +139,7 @@ export default ComponentView.extend({
    * Merge content from the DOM to the model
    */
   syncContent(opts = {}) {
-    console.log('dom_components/view/ComponentTextView.js => syncContent start');
+    //console.log('dom_components/view/ComponentTextView.js => syncContent start');
     const { model, rte, rteEnabled } = this;
     if (!rteEnabled && !opts.force) return;
     const content = this.getContent();
@@ -164,7 +164,7 @@ export default ComponentView.extend({
     } else {
       comps.resetFromString(content, opts);
     }
-    console.log('dom_components/view/ComponentTextView.js => syncContent end');
+    //console.log('dom_components/view/ComponentTextView.js => syncContent end');
     let op = {
       action: 'update-content',
       opts: opOpts,
@@ -246,7 +246,7 @@ export default ComponentView.extend({
    * @param {Boolean} enable
    */
   toggleEvents(enable) {
-    console.log('ComponentView.js => toggleEvent start');
+    //console.log('ComponentView.js => toggleEvent start');
     const { em, model, $el } = this;
     const mixins = { on, off };
     const method = enable ? 'on' : 'off';
@@ -279,6 +279,6 @@ export default ComponentView.extend({
         el && el.tagName == 'BODY' && (el = 0);
       }
     }
-    console.log('ComponentView.js => toggleEvent end');
+    //console.log('ComponentView.js => toggleEvent end');
   },
 });

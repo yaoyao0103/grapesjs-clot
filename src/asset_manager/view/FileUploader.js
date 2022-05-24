@@ -112,7 +112,7 @@ export default Backbone.View.extend(
      * */
     uploadFile(e, clb) {
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-      console.log('FileUploader.js => uploadFile files:', files);
+      //console.log('FileUploader.js => uploadFile files:', files);
       const { config } = this;
       const { beforeUpload } = config;
 

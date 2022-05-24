@@ -9,11 +9,11 @@ export default class Selected extends Collection {
   }
 
   addComponent(component, opts) {
-    console.log('Selected.js => addComponent start');
+    //console.log('Selected.js => addComponent start');
     const toAdd = (isArray(component) ? component : [component])
       .filter(c => !this.hasComponent(c))
       .map(component => ({ component }));
-    console.log('Selected.js => addComponent end');
+    //console.log('Selected.js => addComponent end');
     return this.push(toAdd, opts);
   }
 
@@ -36,9 +36,9 @@ export default class Selected extends Collection {
   }
 
   removeComponent(component, opts) {
-    console.log('Selected.js => removeComponent start');
+    //console.log('Selected.js => removeComponent start');
     const toRemove = (isArray(component) ? component : [component]).map(c => this.getByComponent(c));
-    console.log('Selected.js => removeComponent end');
+    //console.log('Selected.js => removeComponent end');
     return this.remove(toRemove, opts);
   }
 }

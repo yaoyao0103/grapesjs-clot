@@ -429,9 +429,9 @@ export default () => {
      * styleManager.addStyleTargets({ color: 'red' });
      */
     addStyleTargets(style, opts) {
-      console.log('style_manager/index.js => addStyleTargets start');
-      console.log('this.getSelectedAll(): ' + JSON.stringify(this.getSelectedAll()));
-      console.log('this.getSelected(): ' + JSON.stringify(this.getSelected()));
+      //console.log('style_manager/index.js => addStyleTargets start');
+      //console.log('this.getSelectedAll(): ' + JSON.stringify(this.getSelectedAll()));
+      //console.log('this.getSelected(): ' + JSON.stringify(this.getSelected()));
       this.getSelectedAll().map(t => t.addStyle(style, opts));
 
       // Update state rule
@@ -440,7 +440,7 @@ export default () => {
       let id = parse(stringify(target)).selectors[0].substring(1);
 
       target && targetState?.setStyle(target.getStyle(), opts);
-      console.log('style_manager/index.js => addStyleTargets end');
+      //console.log('style_manager/index.js => addStyleTargets end');
 
       let opOpts = {
         id: id,

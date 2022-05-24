@@ -29,7 +29,7 @@ export default {
   },
 
   toggleDragger(enable, ev) {
-    console.log('commands/view/CanvasMove.js => toggleDragger start');
+    //console.log('commands/view/CanvasMove.js => toggleDragger start');
     const { canvasModel, em } = this;
     let { dragger } = this;
     const methodCls = enable ? 'add' : 'remove';
@@ -60,7 +60,7 @@ export default {
     }
 
     enable ? dragger.start(ev) : dragger.stop();
-    console.log('commands/view/CanvasMove.js => toggleDragger end');
+    //console.log('commands/view/CanvasMove.js => toggleDragger end');
   },
 
   toggleMove(enable) {

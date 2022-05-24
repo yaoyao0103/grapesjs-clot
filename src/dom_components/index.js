@@ -459,7 +459,7 @@ export default () => {
      * });
      */
     addComponent(component, opt = {}) {
-      console.log('dom_components/index.js => addComponent');
+      //console.log('dom_components/index.js => addComponent');
       return this.getComponents().add(component, opt);
     },
 
@@ -606,18 +606,18 @@ export default () => {
     },
 
     selectAdd(component, opts = {}) {
-      console.log('dom_component/index.js => selectAdd start');
+      //console.log('dom_component/index.js => selectAdd start');
       if (component) {
         component.set({
           status: 'selected',
         });
         ['component:selected', 'component:toggled'].forEach(event => this.em.trigger(event, component, opts));
       }
-      console.log('dom_component/index.js => selectAdd end');
+      //console.log('dom_component/index.js => selectAdd end');
     },
 
     selectRemove(component, opts = {}) {
-      console.log('dom_component/index.js => selectRemove start');
+      //console.log('dom_component/index.js => selectRemove start');
       if (component) {
         const { em } = this;
         component.set({
@@ -626,7 +626,7 @@ export default () => {
         });
         ['component:deselected', 'component:toggled'].forEach(event => this.em.trigger(event, component, opts));
       }
-      console.log('dom_component/index.js => selectRemove end');
+      //console.log('dom_component/index.js => selectRemove end');
     },
 
     /**

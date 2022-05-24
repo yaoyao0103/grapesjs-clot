@@ -315,7 +315,7 @@ export default class EditorModel extends Model {
    */
   setSelected(el, opts = {}) {
     //console.trace();
-    console.log('Editor.js => setSelected start');
+    //console.log('Editor.js => setSelected start');
     const { event } = opts;
     const ctrlKey = event && (event.ctrlKey || event.metaKey);
     const { shiftKey } = event || {};
@@ -392,7 +392,7 @@ export default class EditorModel extends Model {
       this.addSelected(model, opts);
       added = model;
     });
-    console.log('Editor.js => setSelected end');
+    //console.log('Editor.js => setSelected end');
   }
 
   /**
@@ -402,7 +402,7 @@ export default class EditorModel extends Model {
    * @private
    */
   addSelected(el, opts = {}) {
-    console.log('Editor.js => addSelected start');
+    //console.log('Editor.js => addSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
 
@@ -416,7 +416,6 @@ export default class EditorModel extends Model {
       if (model) {
         let opOpts = {
           id: model.getId(),
-          username: 'user1',
         };
         let op = {
           action: 'select-component',
@@ -444,11 +443,11 @@ export default class EditorModel extends Model {
    * @private
    */
   removeSelected(el, opts = {}) {
-    console.log('Editor.js => removeSelected start');
+    //console.log('Editor.js => removeSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
     this.get('selected').removeComponent(model, opts);
-    console.log('Editor.js => removeSelected end');
+    //console.log('Editor.js => removeSelected end');
     models.forEach(model => {
       if (model) {
         let opOpts = {
@@ -480,7 +479,7 @@ export default class EditorModel extends Model {
    * @private
    */
   toggleSelected(el, opts = {}) {
-    console.log('Editor.js => toggleSelected start');
+    //console.log('Editor.js => toggleSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
 
@@ -491,7 +490,7 @@ export default class EditorModel extends Model {
         this.addSelected(model, opts);
       }
     });
-    console.log('Editor.js => toggleSelected end');
+    //console.log('Editor.js => toggleSelected end');
   }
 
   /**
@@ -540,8 +539,8 @@ export default class EditorModel extends Model {
    * @private
    */
   setComponents(components, opt = {}) {
-    console.log('editor/model/editor.js/setComponents()--start');
-    console.log('editor/model/editor.js/setComponents()--end');
+    //console.log('editor/model/editor.js/setComponents()--start');
+    //console.log('editor/model/editor.js/setComponents()--end');
     return this.get('DomComponents').setComponents(components, opt);
   }
 

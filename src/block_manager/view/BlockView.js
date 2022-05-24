@@ -26,7 +26,7 @@ export default Backbone.View.extend({
   },
 
   handleClick(ev) {
-    console.log('BlockView.js => handleClick start');
+    //console.log('BlockView.js => handleClick start');
     const { config, model, em } = this;
     const onClick = model.get('onClick') || config.appendOnClick;
     em.trigger('block:click', model, ev);
@@ -64,7 +64,7 @@ export default Backbone.View.extend({
 
     const result = target && target.append(content)[0];
     result && em.setSelected(result, { scroll: 1 });
-    console.log('BlockView.js => handleClick end');
+    //console.log('BlockView.js => handleClick end');
   },
 
   /**

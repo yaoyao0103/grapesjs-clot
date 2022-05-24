@@ -991,7 +991,7 @@ export default Backbone.View.extend({
    * @return void
    * */
   endMove(e) {
-    console.log('utils/Sorter.js => endMove start');
+    //console.log('utils/Sorter.js => endMove start');
     const src = this.sourceEl;
     const moved = [];
     const docs = this.getDocuments();
@@ -1040,7 +1040,7 @@ export default Backbone.View.extend({
       moved.length ? moved.forEach(m => onEndMove(m, this, data)) : onEndMove(null, this, { ...data, cancelled: 1 });
     }
     isFunction(onEnd) && onEnd({ sorter: this });
-    console.log('utils/Sorter.js => endMove end');
+    //console.log('utils/Sorter.js => endMove end');
   },
 
   myMove(paramOpts) {
@@ -1050,7 +1050,7 @@ export default Backbone.View.extend({
     let src = paramOpts.src;
     let pos = paramOpts.pos;
     let trgModel = this.getTargetModel(dst);
-    let srcModel = src ? domc.getById(src.attributes.id) : null;
+    let srcModel = src ? domc.getById(src.attributes.id || src.ccid || src.cid) : null;
     let draggable = paramOpts.draggable;
     let droppable = paramOpts.droppable;
     const srcEl = getElement(src);
@@ -1059,14 +1059,13 @@ export default Backbone.View.extend({
     let validResult;
     let modelToDrop, created;
 
-    if (srcModel) {
+    /*if (srcModel) {
       srcModel.set('status', '');
       srcModel.set('status', 'selected');
-    }
+    }*/
 
-    dst.classList.remove('gjs-selected-parent');
+    //dst.classList.remove('gjs-selected-parent');
     let targetCollection = $(this.document.getElementById(paramOpts.dst.id)).data('collection');
-
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
       const isTextable = this.isTextableActive(srcModel, trgModel);
@@ -1076,7 +1075,6 @@ export default Backbone.View.extend({
         const sameCollection = targetCollection === srcModel.collection;
         const sameIndex = srcIndex === index || srcIndex === index - 1;
         const canRemove = !sameCollection || !sameIndex || isTextable;
-
         if (canRemove) {
           modelToDrop = srcModel.collection.remove(srcModel, { temporary: true });
           if (sameCollection && index > srcIndex) {
@@ -1100,7 +1098,10 @@ export default Backbone.View.extend({
       }
 
       // set ids on the new component
-      setComponentIdsWithArray(created, paramOpts.idArray);
+      if (created) {
+        setComponentIdsWithArray(created, paramOpts.idArray);
+      }
+
       this.dropContent = null;
       this.prevTarget = null; // This will recalculate children dimensions
     } else if (em) {
@@ -1117,7 +1118,6 @@ export default Backbone.View.extend({
         target: trgModel,
       });
     }
-
     em?.trigger('sorter:drag:end', {
       targetCollection,
       modelToDrop,
@@ -1126,7 +1126,6 @@ export default Backbone.View.extend({
       dst,
       srcEl,
     });
-    console.log('utils/Sorter.js move end');
     return created;
   },
 
@@ -1137,19 +1136,24 @@ export default Backbone.View.extend({
    * @param {Object} pos Object with position coordinates
    * */
   move(dst, src, pos) {
-    console.log('Sorter.js => move start');
+    //console.log('Sorter.js => move start');
     let { em, dropContent } = this;
 
     const srcEl = getElement(src);
+    console.log('1');
     const warns = [];
     const index = pos.method === 'after' ? pos.indexEl + 1 : pos.indexEl;
     const validResult = this.validTarget(dst, srcEl);
+    console.log('2');
     const { trgModel, srcModel, draggable } = validResult;
 
     const targetCollection = $(dst).data('collection');
+    console.log('3');
 
     const droppable = trgModel instanceof Backbone.Collection ? 1 : validResult.droppable;
     let modelToDrop, created;
+
+    console.log('4');
 
     let tmpNode = document.createElement('div');
     tmpNode.appendChild(dst.cloneNode());
@@ -1159,7 +1163,10 @@ export default Backbone.View.extend({
 
     let opOpts = {
       dst: dstString,
+      dstId: dst.id,
       src: src,
+      srcId: src ? src.parent().getId() : null,
+      srcIndex: src ? src.collection.indexOf(src) : null,
       pos: pos,
       dropContent: parse(stringify(dropContent)),
       draggable: draggable,
@@ -1172,7 +1179,6 @@ export default Backbone.View.extend({
 
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
-      op.action = 'move-component';
       const isTextable = this.isTextableActive(srcModel, trgModel);
 
       if (!dropContent) {
@@ -1191,11 +1197,9 @@ export default Backbone.View.extend({
         modelToDrop = isFunction(dropContent) ? dropContent() : dropContent;
         opts.avoidUpdateStyle = true;
         opts.action = 'add-component';
-        op.action = 'move-component';
       }
 
       if (modelToDrop) {
-        console.log('2!!');
         if (isTextable) {
           delete opts.at;
           created = trgModel.getView().insertComponent(modelToDrop, opts);
@@ -1205,10 +1209,12 @@ export default Backbone.View.extend({
         }
       }
 
-      // set new component
-      setComponentIds(created);
-      // get the ids of the new components
-      idArray = getComponentIds(created);
+      if (created) {
+        // set new component
+        setComponentIds(created);
+        // get the ids of the new components
+        idArray = getComponentIds(created);
+      }
 
       this.dropContent = null;
       this.prevTarget = null; // This will recalculate children dimensions
@@ -1235,10 +1241,13 @@ export default Backbone.View.extend({
       dst,
       srcEl,
     });
-    console.log('utils/Sorter.js move end');
+    //console.log('utils/Sorter.js move end');
 
     opOpts.idArray = idArray;
     op.opts = opOpts;
+    op.action = src ? 'move-component' : 'add-component';
+
+    if (op.action == 'add-component' && !opOpts.dropContent) return null;
     if (ClientState == ClientStateEnum.Synced) {
       // set state to ApplyingLocalOp
       setState(ClientStateEnum.ApplyingLocalOp);

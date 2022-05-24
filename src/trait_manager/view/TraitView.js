@@ -87,7 +87,7 @@ export default Backbone.View.extend({
    * @private
    */
   onChange(event) {
-    console.log('TraitView.js => onChange start');
+    //console.log('TraitView.js => onChange start');
     const el = this.getInputElem();
     let id = this.em.getSelected().getId();
     let target = this.em.get('DomComponents').getById(id);
@@ -110,7 +110,7 @@ export default Backbone.View.extend({
       event,
     });
 
-    console.log('TraitView.js => onChange end');
+    //console.log('TraitView.js => onChange end');
     let opOpts = {
       id: id,
       traitIndex: traitIndex,
@@ -147,7 +147,7 @@ export default Backbone.View.extend({
    * @private
    */
   onValueChange(model, value, opts = {}) {
-    console.log('trait_manager/view/TraitView.js => onValueChange start');
+    //console.log('trait_manager/view/TraitView.js => onValueChange start');
     if (opts.fromTarget) {
       this.setInputValue(model.get('value'));
       this.postUpdate();
@@ -155,7 +155,7 @@ export default Backbone.View.extend({
       const val = this.getValueForTarget();
       model.setTargetValue(val, opts);
     }
-    console.log('trait_manager/view/TraitView.js => onValueChange end');
+    //console.log('trait_manager/view/TraitView.js => onValueChange end');
   },
 
   /**

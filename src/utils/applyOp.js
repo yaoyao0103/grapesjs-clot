@@ -4,30 +4,24 @@ import { myEditor } from '..';
 // be called when applying remote op
 export const applyDeleteComponent = (ed, opts) => {
   const toSelect = [];
-  let components = opts.component;
-  components = isArray(components) ? [...components] : [components];
+  let domc = ed.getModel().get('DomComponents');
+  let component = domc.getById(opts.id);
   // It's important to deselect components first otherwise,
   // with undo, the component will be set with the wrong `collection`
-  ed.select(null);
-  let domc = ed.getModel().get('DomComponents');
-  components.forEach(component => {
-    // convert component model to a component object
-    if (opts.component) component = domc.getById(component.attributes.id);
-    if (!component || !component.get('removable')) {
-      return ed.getModel().logWarning('The element is not removable', {
-        component,
-      });
-    }
-    component.remove();
-    component.collection && toSelect.push(component);
-  });
-
+  if (!component || !component.get('removable')) {
+    return ed.getModel().logWarning('The element is not removable', {
+      component,
+    });
+  }
+  component.remove();
+  component.collection && toSelect.push(component);
   toSelect.length && ed.select(toSelect);
-  return components;
+  return component;
 };
 
 export const applyUpdateTrait = opts => {
   let target = myEditor.getModel().get('DomComponents').getById(opts.id);
+  if (!target) return;
   let model = target.getTraits()[opts.traitIndex];
   model.set('value', opts.value);
 
@@ -56,6 +50,7 @@ export const applyUpdateTrait = opts => {
 
 export const applyUpdateContent = opts => {
   const model = myEditor.getModel().get('DomComponents').getById(opts.id);
+  if (!model) return;
   //console.log("opts: " + CircularJSON.stringify(opts));
   if (!opts.rteEnabled && !opts.opts.force) return;
   const content = opts.content;
@@ -75,12 +70,16 @@ export const applyUpdateContent = opts => {
 
 export const applyAddSelected = opts => {
   let model = myEditor.getModel().get('DomComponents').getById(opts.id);
-  model.set('status', 'freezed-remote-selected');
-  model.set('chooser', opts.username);
+  if (model) {
+    model.set('status', 'freezed-remote-selected');
+    model.set('chooser', opts.username);
+  }
 };
 
 export const applyRemoveSelected = opts => {
   let model = myEditor.getModel().get('DomComponents').getById(opts.id);
-  model.set('status', '');
-  model.set('chooser', '');
+  if (model) {
+    model.set('status', '');
+    model.set('chooser', '');
+  }
 };

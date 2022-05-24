@@ -13,6 +13,8 @@ import {
   applyRemoveSelected,
 } from './applyOp.js';
 
+import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
+
 export var stompClient = null;
 var username = '';
 var sessionId = '';
@@ -34,7 +36,7 @@ var localTS = 0;
 var localOp = null;
 var remoteOp = null;
 var remoteTS = 0;
-var localOpPrim = null;
+var localOpPrime = null;
 var remoteOpPrime = null;
 var opBuffer = new Array();
 var initBuffer = new Array();
@@ -114,6 +116,8 @@ const onMessageReceived = async payload => {
     // handle it only when the state is EditorInitializing (newly client)
     if (ClientState == ClientStateEnum.EditorInitializing) {
       let remoteOp = CircularJSON.parse(StoC_msg.op);
+      let remoteTS = StoC_msg.ts;
+      localTS = remoteTS;
       if (remoteOp.action == 'copy-wrapper') {
         let opts = remoteOp.opts;
         let wrapper = myEditor.getWrapper();
@@ -123,6 +127,13 @@ const onMessageReceived = async payload => {
         myEditor.setComponents(opts.components);
         myEditor.setStyle(opts.style);
 
+        while (initBuffer.length != 0) {
+          let msg = initBuffer.shift();
+          if (msg.ts > localTS) {
+            remoteOp = CircularJSON.parse(msg.op);
+            applyOp(remoteOp.action, remoteOp.opts);
+          }
+        }
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
         console.log('state: Synced');
@@ -194,10 +205,12 @@ const onMessageReceived = async payload => {
 };
 
 const applyOp = (action, opts) => {
+  console.log('action:', action);
   const droppable = myEditor.getModel().getCurrentFrame().droppable;
   if (action === 'delete-component') {
     applyDeleteComponent(myEditor.getModel().getEditor(), opts);
-  } else if (action === 'append-component') {
+  } else if (action === 'add-component') {
+    if (!opts.dropContent) return;
     droppable.applyAppendOrMoveComponent(opts);
     let components = myEditor.getComponents();
     setComponentIds(components);
@@ -227,6 +240,7 @@ export const setState = state => {
 // finish
 export const SendingOpToController = () => {
   // send Op to controller
+  localOp.username = username;
   let CtoS_Msg = {
     sender: username,
     sessionId: sessionId,
@@ -336,9 +350,11 @@ const ApplyingRemoteOpWithoutACK = StoC_msg => {
   remoteOpPrime = OT(remoteOp, localOp);
   localOpPrime = OT(localOp, remoteOp);
 
+  console.log(remoteOpPrime.opts);
+  console.log(localOpPrime.opts);
   // step 5: call applyOp(remoteOpPrime)
   //console.log(JSON.stringify(remoteOpPrime));
-  applyOp(remoteOpPrime);
+  applyOp(remoteOpPrime.action, remoteOpPrime.opts);
 
   // step 6: set localOp to the value of localOpPrime
   localOp = localOpPrime;
@@ -368,7 +384,10 @@ const ApplyingRemoteOpWithBuffer = StoC_msg => {
   }
 
   // step 5: call applyOp(remoteOpPrime.last)
-  applyOp(remoteOpPrimeArray[remoteOpPrimeArray.length - 1]);
+  applyOp(
+    remoteOpPrimeArray[remoteOpPrimeArray.length - 1].action,
+    remoteOpPrimeArray[remoteOpPrimeArray.length - 1].opts
+  );
 
   // step 6: obtain localOpPrime by evaluating xform(localOp, remoteOp)
   localOpPrime = OT(localOp, remoteOp);
@@ -385,4 +404,34 @@ const ApplyingRemoteOpWithBuffer = StoC_msg => {
   ClientState = ClientStateEnum.SendingOpToController;
   console.log('state: SendingOpToController');
   SendingOpToController();
+};
+
+const OT = (tarOp, refOp) => {
+  let tarAction = tarOp.action;
+  let refAction = refOp.action;
+  let tarOpPrime;
+  if (tarAction === 'add-component') {
+    if (refAction === 'delete-component') {
+      tarOpPrime = TAD(tarOp, refOp); // get A'
+    } else if (refAction === 'move-component') {
+      tarOpPrime = TAM(tarOp, refOp); // get A'
+    } else if (refAction === 'add-component') {
+      tarOpPrime = TAA(tarOp, refOp); // get A'
+    } else {
+      tarOpPrime = tarOp;
+    }
+  } else if (tarAction === 'move-component') {
+    if (refAction === 'delete-component') {
+      tarOpPrime = TMD(tarOp, refOp); // get A'
+    } else if (refAction === 'move-component') {
+      tarOpPrime = TMM(tarOp, refOp); // get A'
+    } else if (refAction === 'add-component') {
+      tarOpPrime = TMA(tarOp, refOp); // get A'
+    } else {
+      tarOpPrime = tarOp;
+    }
+  } else {
+    tarOpPrime = tarOp;
+  }
+  return tarOpPrime;
 };

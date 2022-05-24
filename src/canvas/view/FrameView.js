@@ -346,6 +346,7 @@ export default Backbone.View.extend({
 
       .${ppfx}freezed {
         opacity: 0.5;
+        pointer-events: none;
       }
 
       .${ppfx}no-pointer {

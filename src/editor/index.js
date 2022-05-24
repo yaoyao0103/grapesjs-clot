@@ -221,9 +221,9 @@ export default (config = {}, opts = {}) => {
      * });
      */
     setComponents(components, opt = {}) {
-      console.log('editor/index.js/setComponents()--start');
+      //console.log('editor/index.js/setComponents()--start');
       em.setComponents(components, opt);
-      console.log('editor/index.js/setComponents()--end');
+      //console.log('editor/index.js/setComponents()--end');
       return this;
     },
 
@@ -329,9 +329,9 @@ export default (config = {}, opts = {}) => {
      * });
      */
     select(el, opts) {
-      console.log('editor/index.js => select start');
+      //console.log('editor/index.js => select start');
       em.setSelected(el, opts);
-      console.log('editor/index.js => select end');
+      //console.log('editor/index.js => select end');
       return this;
     },
 
