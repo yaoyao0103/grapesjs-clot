@@ -28,7 +28,7 @@ export const TMM = (tarOp, refOp) => {
   let refDstPos = refOp.opts.pos;
   let refDstIndex = refDstPos.method === 'after' ? refDstPos.indexEl + 1 : refDstPos.indexEl;
 
-  let refSrcId = refOp.opts.srcId;
+  let refSrcId = refOp.opts.srcParentId;
   let refSrcIndex = refOp.opts.srcIndex;
 
   // tar
@@ -36,22 +36,18 @@ export const TMM = (tarOp, refOp) => {
   let tarDstPos = tarOp.opts.pos;
   let tarDstIndex = tarDstPos.method === 'after' ? tarDstPos.indexEl + 1 : tarDstPos.indexEl;
 
-  let tarSrcId = tarOp.opts.srcId;
-  let tarSrcIndex = tarOp.opts.srcIndex;
-
   // Both destination to drop are the same
   if (tarDstId === refSrcId) {
     if (tarDstIndex > refSrcIndex) {
       tarOp.opts.pos.indexEl -= 1;
+      console.log('-----1');
     }
   }
 
   if (refDstId === tarDstId) {
-    if (tarDstIndex > refDstIndex || (tarDstIndex == refDstIndex && tarOp.username <= refOp.username)) {
+    if (tarDstIndex > refDstIndex || (tarDstIndex == refDstIndex && tarOp.username < refOp.username)) {
       tarOp.opts.pos.indexEl += 1;
-      if (tarDstIndex == refDstIndex) {
-        console.log('+++++1');
-      }
+      console.log('+++++1');
     }
   }
   return tarOp;
@@ -68,16 +64,6 @@ export const TMA = (tarOp, refOp) => {
   let tarDstPos = tarOp.opts.pos;
   let tarDstIndex = tarDstPos.method === 'after' ? tarDstPos.indexEl + 1 : tarDstPos.indexEl;
 
-  // tar Src
-  let tarSrcId = tarOp.opts.srcId;
-  let tarSrcIndex = tarOp.opts.srcIndex;
-
-  /*
-    if(tarDstId === tarSrcId){
-        if(tarDstIndex > tarSrcIndex){
-            tarDstIndex -= 1;
-        }
-    }*/
   // Both destination to drop are the same
   if (refDstId === tarDstId) {
     if (tarDstIndex >= refDstIndex) {
@@ -114,7 +100,7 @@ export const TAM = (tarOp, refOp) => {
   let refDstPos = refOp.opts.pos;
   let refDstIndex = refDstPos.method === 'after' ? refDstPos.indexEl + 1 : refDstPos.indexEl;
 
-  let refSrcId = refOp.opts.srcId;
+  let refSrcId = refOp.opts.srcParentId;
   let refSrcIndex = refOp.opts.srcIndex;
 
   // tar
@@ -122,12 +108,6 @@ export const TAM = (tarOp, refOp) => {
   let tarDstPos = tarOp.opts.pos;
   let tarDstIndex = tarDstPos.method === 'after' ? tarDstPos.indexEl + 1 : tarDstPos.indexEl;
 
-  /*
-    if(refDstId === refSrcId){
-        if(refDstIndex > refSrcIndex){
-            refDstIndex -= 1;
-        }
-    }*/
   if (tarDstId === refSrcId) {
     if (tarDstIndex > refSrcIndex) {
       tarOp.opts.pos.indexEl -= 1;

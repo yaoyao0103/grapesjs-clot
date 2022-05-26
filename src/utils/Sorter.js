@@ -1043,14 +1043,14 @@ export default Backbone.View.extend({
     //console.log('utils/Sorter.js => endMove end');
   },
 
-  myMove(paramOpts) {
+  myMove(paramOpts, action) {
     const domc = this.em.get('DomComponents');
     const { em, dropContent } = this;
     let dst = paramOpts.dst;
     let src = paramOpts.src;
     let pos = paramOpts.pos;
     let trgModel = this.getTargetModel(dst);
-    let srcModel = src ? domc.getById(src.attributes.id || src.ccid || src.cid) : null;
+    let srcModel = src ? domc.getById(paramOpts.srcId) : null;
     let draggable = paramOpts.draggable;
     let droppable = paramOpts.droppable;
     const srcEl = getElement(src);
@@ -1065,7 +1065,9 @@ export default Backbone.View.extend({
     }*/
 
     //dst.classList.remove('gjs-selected-parent');
-    let targetCollection = $(this.document.getElementById(paramOpts.dst.id)).data('collection');
+    if (!srcModel && action === 'move-component') return;
+    let targetCollection = $(this.document.getElementById(paramOpts.dstId)).data('collection');
+    console.log('targetCollection', targetCollection);
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
       const isTextable = this.isTextableActive(srcModel, trgModel);
@@ -1098,7 +1100,7 @@ export default Backbone.View.extend({
       }
 
       // set ids on the new component
-      if (created) {
+      if (created && paramOpts.idArray) {
         setComponentIdsWithArray(created, paramOpts.idArray);
       }
 
@@ -1140,20 +1142,15 @@ export default Backbone.View.extend({
     let { em, dropContent } = this;
 
     const srcEl = getElement(src);
-    console.log('1');
     const warns = [];
     const index = pos.method === 'after' ? pos.indexEl + 1 : pos.indexEl;
     const validResult = this.validTarget(dst, srcEl);
-    console.log('2');
     const { trgModel, srcModel, draggable } = validResult;
 
     const targetCollection = $(dst).data('collection');
-    console.log('3');
 
     const droppable = trgModel instanceof Backbone.Collection ? 1 : validResult.droppable;
     let modelToDrop, created;
-
-    console.log('4');
 
     let tmpNode = document.createElement('div');
     tmpNode.appendChild(dst.cloneNode());
@@ -1165,7 +1162,8 @@ export default Backbone.View.extend({
       dst: dstString,
       dstId: dst.id,
       src: src,
-      srcId: src ? src.parent().getId() : null,
+      srcId: src ? src.getId() : null,
+      srcParentId: src ? src.parent().getId() : null,
       srcIndex: src ? src.collection.indexOf(src) : null,
       pos: pos,
       dropContent: parse(stringify(dropContent)),
@@ -1218,6 +1216,23 @@ export default Backbone.View.extend({
 
       this.dropContent = null;
       this.prevTarget = null; // This will recalculate children dimensions
+
+      opOpts.idArray = idArray;
+      op.opts = opOpts;
+      op.action = src ? 'move-component' : 'add-component';
+
+      if (op.action == 'add-component' && !opOpts.dropContent) return null;
+      if (ClientState == ClientStateEnum.Synced) {
+        // set state to ApplyingLocalOp
+        setState(ClientStateEnum.ApplyingLocalOp);
+        // increase localTS and set localOp
+        ApplyingLocalOp(op);
+      } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+        // set state to ApplyingBufferedLocalOp
+        setState(ClientStateEnum.ApplyingBufferedLocalOp);
+        // push the op to buffer
+        ApplyingBufferedLocalOp(op);
+      }
     } else if (em) {
       const dropInfo = validResult.dropInfo || trgModel?.get('droppable');
       const dragInfo = validResult.dragInfo || srcModel?.get('draggable');
@@ -1243,22 +1258,6 @@ export default Backbone.View.extend({
     });
     //console.log('utils/Sorter.js move end');
 
-    opOpts.idArray = idArray;
-    op.opts = opOpts;
-    op.action = src ? 'move-component' : 'add-component';
-
-    if (op.action == 'add-component' && !opOpts.dropContent) return null;
-    if (ClientState == ClientStateEnum.Synced) {
-      // set state to ApplyingLocalOp
-      setState(ClientStateEnum.ApplyingLocalOp);
-      // increase localTS and set localOp
-      ApplyingLocalOp(op);
-    } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
-      // set state to ApplyingBufferedLocalOp
-      setState(ClientStateEnum.ApplyingBufferedLocalOp);
-      // push the op to buffer
-      ApplyingBufferedLocalOp(op);
-    }
     return created;
   },
 

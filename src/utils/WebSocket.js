@@ -211,12 +211,12 @@ const applyOp = (action, opts) => {
     applyDeleteComponent(myEditor.getModel().getEditor(), opts);
   } else if (action === 'add-component') {
     if (!opts.dropContent) return;
-    droppable.applyAppendOrMoveComponent(opts);
+    droppable.applyAppendOrMoveComponent(opts, 'add-component');
     let components = myEditor.getComponents();
     setComponentIds(components);
     //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'move-component') {
-    droppable.applyAppendOrMoveComponent(opts);
+    droppable.applyAppendOrMoveComponent(opts, 'move-component');
     //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'select-component') {
     applyAddSelected(opts);
@@ -350,8 +350,6 @@ const ApplyingRemoteOpWithoutACK = StoC_msg => {
   remoteOpPrime = OT(remoteOp, localOp);
   localOpPrime = OT(localOp, remoteOp);
 
-  console.log(remoteOpPrime.opts);
-  console.log(localOpPrime.opts);
   // step 5: call applyOp(remoteOpPrime)
   //console.log(JSON.stringify(remoteOpPrime));
   applyOp(remoteOpPrime.action, remoteOpPrime.opts);
