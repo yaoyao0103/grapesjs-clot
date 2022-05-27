@@ -83,3 +83,12 @@ export const applyRemoveSelected = opts => {
     model.set('chooser', '');
   }
 };
+
+export const applyLocalAddSelected = opts => {
+  if (model && !model.get('selectable')) return;
+  let model = myEditor.getModel().get('DomComponents').getById(opts.id);
+  const selected = myEditor.getModel().get('selected');
+  opts.opts.forceChange && myEditor.getModel().removeSelected(model, opts.opts);
+  selected.addComponent(model, opts.opts);
+  model && myEditor.getModel().trigger('component:select', model, opts.opts);
+};

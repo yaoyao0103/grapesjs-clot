@@ -31,7 +31,13 @@ export const ClientStateEnum = {
   SendingOpToController: 10,
   EditorInitializing: 11,
 };
+export const SelectStateEnum = {
+  Allow: 1,
+  Deny: 2,
+  Waiting: 3,
+};
 export var ClientState = ClientStateEnum.EditorInitializing;
+export var SelectState = SelectStateEnum.Allow;
 var localTS = 0;
 var localOp = null;
 var remoteOp = null;
@@ -143,6 +149,11 @@ const onMessageReceived = async payload => {
     }
   } else if (StoC_msg.type === 'LEAVE') {
   } else if (StoC_msg.type === 'ACK') {
+    remoteOp = CircularJSON.parse(StoC_msg.op);
+    if (remoteOp.action === 'select-component' && SelectState == SelectStateEnum.Allow) {
+      let opts = remoteOp.opts;
+      await applyLocalAddSelected(opts);
+    }
     //-------------------------- State: AwaitingACK ------------------------------
     if (ClientState == ClientStateEnum.AwaitingACK) {
       ClientState = ClientStateEnum.Synced;
@@ -167,7 +178,8 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'OP') {
-    console.log('ClientState: ' + ClientState);
+    // not get ACK msg => select-component OP had been denied
+    SelectState = SelectStateEnum.Deny;
     //--------------------------- State: Synced -----------------------------
     if (ClientState == ClientStateEnum.Synced) {
       /***** ApplyRemoteOp *****/
@@ -239,6 +251,10 @@ const applyOp = (action, opts) => {
 // finish
 export const setState = state => {
   ClientState = state;
+};
+
+export const setSelectState = state => {
+  SelectState = state;
 };
 
 // finish

@@ -8,7 +8,10 @@ import Selected from './Selected';
 import {
   ClientState,
   ClientStateEnum,
+  SelectState,
+  SelectStateEnum,
   setState,
+  setSelectState,
   ApplyingLocalOp,
   ApplyingBufferedLocalOp,
 } from '../../utils/WebSocket';
@@ -405,17 +408,19 @@ export default class EditorModel extends Model {
     //console.log('Editor.js => addSelected start');
     const model = getModel(el, $);
     const models = isArray(model) ? model : [model];
+    /*
+    console.log("allow!");
+    if (model && !model.get('selectable')) return;
+    const selected = this.get('selected');
+    opts.forceChange && this.removeSelected(model, opts);
+    selected.addComponent(model, opts);
+    model && this.trigger('component:select', model, opts);*/
 
     models.forEach(model => {
-      if (model && !model.get('selectable')) return;
-      const selected = this.get('selected');
-      opts.forceChange && this.removeSelected(model, opts);
-      selected.addComponent(model, opts);
-      model && this.trigger('component:select', model, opts);
-
       if (model) {
         let opOpts = {
           id: model.getId(),
+          opts: opts,
         };
         let op = {
           action: 'select-component',
@@ -424,11 +429,15 @@ export default class EditorModel extends Model {
         if (ClientState == ClientStateEnum.Synced) {
           // set state to ApplyingLocalOp
           setState(ClientStateEnum.ApplyingLocalOp);
+          // set select state to Waiting
+          setSelectState(SelectStateEnum.Allow);
           // increase localTS and set localOp
           ApplyingLocalOp(op);
         } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
           // set state to ApplyingBufferedLocalOp
           setState(ClientStateEnum.ApplyingBufferedLocalOp);
+          // set select state to Waiting
+          setSelectState(SelectStateEnum.Allow);
           // push the op to buffer
           ApplyingBufferedLocalOp(op);
         }
