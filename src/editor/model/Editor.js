@@ -412,6 +412,7 @@ export default class EditorModel extends Model {
       const selected = this.get('selected');
       opts.forceChange && this.removeSelected(model, opts);
       selected.addComponent(model, opts);
+      model && model.set('chooser', username);
       model && this.trigger('component:select', model, opts);
 
       if (model) {
@@ -452,6 +453,7 @@ export default class EditorModel extends Model {
     //console.log('Editor.js => removeSelected end');
     models.forEach(model => {
       if (model) {
+        model.set('chooser', '');
         let opOpts = {
           id: model.getId(),
         };

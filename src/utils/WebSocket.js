@@ -3,7 +3,12 @@ import SockJS from 'sockjs-client';
 import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
-import { setComponentIds, setComponentRemoteUnSelected } from '../dom_components/model/Components';
+import {
+  setComponentIds,
+  setComponentRemoteUnSelected,
+  setComponentRemoteSelected,
+  checkComponentsChooser,
+} from '../dom_components/model/Components';
 
 import {
   applyDeleteComponent,
@@ -91,6 +96,7 @@ const onMessageReceived = async payload => {
       let components = myEditor.getComponents();
       let style = myEditor.getStyle();
       setComponentIds(components);
+      checkComponentsChooser(components);
 
       let id = wrapper.get('attributes').id;
       let op = {
@@ -136,6 +142,8 @@ const onMessageReceived = async payload => {
             applyOp(remoteOp.action, remoteOp.opts);
           }
         }
+        let components = myEditor.getComponents();
+        setComponentRemoteSelected(components);
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
         console.log('state: Synced');
