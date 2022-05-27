@@ -417,7 +417,9 @@ export default () => {
 
     // be called when applying remote op
     applyUpdateStyle(opts) {
-      let target = myEditor.getModel().get('DomComponents').getById(opts.id);
+      console.log('opts', opts);
+      let target = this.em.get('DomComponents').getById(opts.id);
+      console.log('target', target);
       target.addStyle(opts.style, opts.opts);
     },
 
@@ -435,11 +437,11 @@ export default () => {
       this.getSelectedAll().map(t => t.addStyle(style, opts));
 
       // Update state rule
-      const target = this.getSelected();
-      const targetState = this.__getStateTarget();
-      let id = parse(stringify(target)).selectors[0].substring(1);
-
-      target && targetState?.setStyle(target.getStyle(), opts);
+      const target = this.em.getSelected();
+      //const targetState = this.__getStateTarget();
+      let id = target.getId();
+      target.setStyle(target.getStyle(), opts);
+      // target && targetState?.setStyle(target.getStyle(), opts);
       //console.log('style_manager/index.js => addStyleTargets end');
 
       let opOpts = {
