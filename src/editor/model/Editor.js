@@ -6,6 +6,7 @@ import { getModel, hasWin } from 'utils/mixins';
 import { Model } from 'common';
 import Selected from './Selected';
 import {
+  username,
   ClientState,
   ClientStateEnum,
   setState,
@@ -416,6 +417,7 @@ export default class EditorModel extends Model {
       if (model) {
         let opOpts = {
           id: model.getId(),
+          username: username,
         };
         let op = {
           action: 'select-component',

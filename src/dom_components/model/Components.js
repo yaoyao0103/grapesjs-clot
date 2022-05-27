@@ -29,6 +29,18 @@ export const setComponentIdsWithArray = (cmp, idArray) => {
   });
 };
 
+export const setComponentRemoteUnSelected = (cmp, username) => {
+  const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
+  cmps.map(cmp => {
+    if (cmp.get('chooser') == username) {
+      cmp.set('status', '');
+      cmp.set('chooser', '');
+    }
+
+    setComponentRemoteUnSelected(cmp.components().models);
+  });
+};
+
 const getComponentsFromDefs = (items, all = {}, opts = {}) => {
   const itms = isArray(items) ? items : [items];
 

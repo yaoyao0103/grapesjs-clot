@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
-import { setComponentIds } from '../dom_components/model/Components';
+import { setComponentIds, setComponentRemoteUnSelected } from '../dom_components/model/Components';
 
 import {
   applyDeleteComponent,
@@ -16,7 +16,7 @@ import {
 import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
 
 export var stompClient = null;
-var username = '';
+export var username = '';
 var sessionId = '';
 export const ClientStateEnum = {
   Synced: 1,
@@ -142,6 +142,9 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'LEAVE') {
+    let components = myEditor.getComponents();
+    console.log('sender', StoC_msg.sender);
+    setComponentRemoteUnSelected(components, StoC_msg.sender);
   } else if (StoC_msg.type === 'ACK') {
     //-------------------------- State: AwaitingACK ------------------------------
     if (ClientState == ClientStateEnum.AwaitingACK) {
