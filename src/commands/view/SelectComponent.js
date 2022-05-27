@@ -278,6 +278,7 @@ export default {
     if (em.get('_cmpDrag')) return em.set('_cmpDrag');
     const $el = $(ev.target);
     let model = $el.data('model');
+    if (model.get('status') == 'freezed-remote-selected') return;
 
     if (!model) {
       let parent = $el.parent();
