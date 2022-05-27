@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
-import { setComponentIds } from '../dom_components/model/Components';
+import { setComponentIds, setComponentRemoteUnSelected } from '../dom_components/model/Components';
 
 import {
   applyDeleteComponent,
@@ -16,7 +16,7 @@ import {
 import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
 
 export var stompClient = null;
-var username = '';
+export var username = '';
 var sessionId = '';
 export const ClientStateEnum = {
   Synced: 1,
@@ -31,13 +31,7 @@ export const ClientStateEnum = {
   SendingOpToController: 10,
   EditorInitializing: 11,
 };
-export const SelectStateEnum = {
-  Allow: 1,
-  Deny: 2,
-  Waiting: 3,
-};
 export var ClientState = ClientStateEnum.EditorInitializing;
-export var SelectState = SelectStateEnum.Allow;
 var localTS = 0;
 var localOp = null;
 var remoteOp = null;
@@ -148,12 +142,10 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'LEAVE') {
+    let components = myEditor.getComponents();
+    console.log('sender', StoC_msg.sender);
+    setComponentRemoteUnSelected(components, StoC_msg.sender);
   } else if (StoC_msg.type === 'ACK') {
-    remoteOp = CircularJSON.parse(StoC_msg.op);
-    if (remoteOp.action === 'select-component' && SelectState == SelectStateEnum.Allow) {
-      let opts = remoteOp.opts;
-      await applyLocalAddSelected(opts);
-    }
     //-------------------------- State: AwaitingACK ------------------------------
     if (ClientState == ClientStateEnum.AwaitingACK) {
       ClientState = ClientStateEnum.Synced;
@@ -178,8 +170,7 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'OP') {
-    // not get ACK msg => select-component OP had been denied
-    SelectState = SelectStateEnum.Deny;
+    console.log('ClientState: ' + ClientState);
     //--------------------------- State: Synced -----------------------------
     if (ClientState == ClientStateEnum.Synced) {
       /***** ApplyRemoteOp *****/
@@ -251,10 +242,6 @@ const applyOp = (action, opts) => {
 // finish
 export const setState = state => {
   ClientState = state;
-};
-
-export const setSelectState = state => {
-  SelectState = state;
 };
 
 // finish
