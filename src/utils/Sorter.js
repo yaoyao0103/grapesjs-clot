@@ -1059,15 +1059,15 @@ export default Backbone.View.extend({
     let validResult;
     let modelToDrop, created;
 
-    /*if (srcModel) {
+    if (srcModel) {
       srcModel.set('status', '');
       srcModel.set('status', 'selected');
-    }*/
+    }
 
     //dst.classList.remove('gjs-selected-parent');
     if (!srcModel && action === 'move-component') return;
     let targetCollection = $(this.document.getElementById(paramOpts.dstId)).data('collection');
-    console.log('targetCollection', targetCollection);
+
     if (targetCollection && droppable && draggable) {
       const opts = { at: index, action: 'move-component' };
       const isTextable = this.isTextableActive(srcModel, trgModel);

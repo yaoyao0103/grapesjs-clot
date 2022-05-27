@@ -87,13 +87,11 @@ const onMessageReceived = async payload => {
     }
     // join msg of other clients
     else {
-      console.log('state: EditorInitializing');
       let wrapper = myEditor.getWrapper();
       let components = myEditor.getComponents();
       let style = myEditor.getStyle();
       setComponentIds(components);
 
-      localTS += 1;
       let id = wrapper.get('attributes').id;
       let op = {
         action: 'copy-wrapper',
@@ -111,6 +109,9 @@ const onMessageReceived = async payload => {
         op: CircularJSON.stringify(op),
       };
       stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
+
+      console.log('send copy!');
+      console.log('state: ' + ClientState);
     }
   } else if (StoC_msg.type === 'COPY') {
     // handle it only when the state is EditorInitializing (newly client)
@@ -129,6 +130,7 @@ const onMessageReceived = async payload => {
 
         while (initBuffer.length != 0) {
           let msg = initBuffer.shift();
+          console.log('msg.ts localTS' + msg.ts + '-' + localTS);
           if (msg.ts > localTS) {
             remoteOp = CircularJSON.parse(msg.op);
             applyOp(remoteOp.action, remoteOp.opts);
@@ -158,7 +160,8 @@ const onMessageReceived = async payload => {
       if (
         ClientState != ClientStateEnum.AwaitingACK &&
         ClientState != ClientStateEnum.AwaitingWithBuffer &&
-        ClientState != ClientStateEnum.EditorInitializing
+        ClientState != ClientStateEnum.EditorInitializing &&
+        ClientState != ClientStateEnum.Synced
       ) {
         onMessageReceived(payload);
       }
@@ -188,6 +191,7 @@ const onMessageReceived = async payload => {
     }
     //-------------------------- State: EditorInitializing ------------------------------
     else if (ClientState == ClientStateEnum.EditorInitializing) {
+      console.log('push to initBuffer!');
       initBuffer.push(StoC_msg);
     }
     //-------------------------- State: Others ------------------------------

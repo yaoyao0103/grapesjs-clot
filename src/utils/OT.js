@@ -40,14 +40,14 @@ export const TMM = (tarOp, refOp) => {
   if (tarDstId === refSrcId) {
     if (tarDstIndex > refSrcIndex) {
       tarOp.opts.pos.indexEl -= 1;
-      console.log('-----1');
+      console.log('-----1 => ' + tarOp.opts.pos.indexEl);
     }
   }
 
   if (refDstId === tarDstId) {
-    if (tarDstIndex > refDstIndex || (tarDstIndex == refDstIndex && tarOp.username < refOp.username)) {
+    if (tarDstIndex > refDstIndex || (tarDstIndex == refDstIndex && tarOp.username > refOp.username)) {
       tarOp.opts.pos.indexEl += 1;
-      console.log('+++++1');
+      console.log('+++++1 => ' + tarOp.opts.pos.indexEl);
     }
   }
   return tarOp;
