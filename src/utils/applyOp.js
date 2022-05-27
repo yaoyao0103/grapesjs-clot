@@ -1,5 +1,6 @@
 import { isArray } from 'underscore';
 import { myEditor } from '..';
+import { username } from './WebSocket';
 
 // be called when applying remote op
 export const applyDeleteComponent = (ed, opts) => {
@@ -90,5 +91,6 @@ export const applyLocalAddSelected = opts => {
   const selected = myEditor.getModel().get('selected');
   opts.opts.forceChange && myEditor.getModel().removeSelected(model, opts.opts);
   selected.addComponent(model, opts.opts);
+  model && model.set('chooser', username);
   model && myEditor.getModel().trigger('component:select', model, opts.opts);
 };

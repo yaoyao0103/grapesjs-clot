@@ -460,6 +460,7 @@ export default class EditorModel extends Model {
     //console.log('Editor.js => removeSelected end');
     models.forEach(model => {
       if (model) {
+        model.set('chooser', '');
         let opOpts = {
           id: model.getId(),
         };

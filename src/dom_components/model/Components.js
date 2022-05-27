@@ -41,6 +41,26 @@ export const setComponentRemoteUnSelected = (cmp, username) => {
   });
 };
 
+export const setComponentRemoteSelected = cmp => {
+  const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
+  cmps.map(cmp => {
+    if (cmp.get('chooser').length > 0) {
+      cmp.set('status', 'freezed-remote-selected');
+    }
+    setComponentRemoteSelected(cmp.components().models);
+  });
+};
+
+export const checkComponentsChooser = cmp => {
+  const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
+  cmps.map(cmp => {
+    if (cmp.get('chooser').length > 0) {
+      if (cmp.get('status') != 'selected' && cmp.get('status') != 'freezed-remote-selected') cmp.set('chooser', '');
+    }
+    checkComponentsChooser(cmp.components().models);
+  });
+};
+
 const getComponentsFromDefs = (items, all = {}, opts = {}) => {
   const itms = isArray(items) ? items : [items];
 

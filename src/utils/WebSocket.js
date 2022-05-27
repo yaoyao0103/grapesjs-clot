@@ -3,7 +3,12 @@ import SockJS from 'sockjs-client';
 import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
-import { setComponentIds, setComponentRemoteUnSelected } from '../dom_components/model/Components';
+import {
+  setComponentIds,
+  setComponentRemoteUnSelected,
+  setComponentRemoteSelected,
+  checkComponentsChooser,
+} from '../dom_components/model/Components';
 
 import {
   applyDeleteComponent,
@@ -11,6 +16,7 @@ import {
   applyUpdateContent,
   applyAddSelected,
   applyRemoveSelected,
+  applyLocalAddSelected,
 } from './applyOp.js';
 
 import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
@@ -31,7 +37,13 @@ export const ClientStateEnum = {
   SendingOpToController: 10,
   EditorInitializing: 11,
 };
+export const SelectStateEnum = {
+  Allow: 1,
+  Deny: 2,
+  Waiting: 3,
+};
 export var ClientState = ClientStateEnum.EditorInitializing;
+export var SelectState = SelectStateEnum.Allow;
 var localTS = 0;
 var localOp = null;
 var remoteOp = null;
@@ -91,6 +103,7 @@ const onMessageReceived = async payload => {
       let components = myEditor.getComponents();
       let style = myEditor.getStyle();
       setComponentIds(components);
+      checkComponentsChooser(components);
 
       let id = wrapper.get('attributes').id;
       let op = {
@@ -136,6 +149,9 @@ const onMessageReceived = async payload => {
             applyOp(remoteOp.action, remoteOp.opts);
           }
         }
+        let components = myEditor.getComponents();
+        console.log('setComponentRemoteSelected');
+        setComponentRemoteSelected(components);
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
         console.log('state: Synced');
@@ -146,6 +162,11 @@ const onMessageReceived = async payload => {
     console.log('sender', StoC_msg.sender);
     setComponentRemoteUnSelected(components, StoC_msg.sender);
   } else if (StoC_msg.type === 'ACK') {
+    remoteOp = CircularJSON.parse(StoC_msg.op);
+    if (remoteOp.action === 'select-component' && SelectState == SelectStateEnum.Allow) {
+      let opts = remoteOp.opts;
+      await applyLocalAddSelected(opts);
+    }
     //-------------------------- State: AwaitingACK ------------------------------
     if (ClientState == ClientStateEnum.AwaitingACK) {
       ClientState = ClientStateEnum.Synced;
@@ -170,7 +191,8 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'OP') {
-    console.log('ClientState: ' + ClientState);
+    // not get ACK msg => select-component OP had been denied
+    SelectState = SelectStateEnum.Deny;
     //--------------------------- State: Synced -----------------------------
     if (ClientState == ClientStateEnum.Synced) {
       /***** ApplyRemoteOp *****/
@@ -242,6 +264,10 @@ const applyOp = (action, opts) => {
 // finish
 export const setState = state => {
   ClientState = state;
+};
+
+export const setSelectState = state => {
+  SelectState = state;
 };
 
 // finish
