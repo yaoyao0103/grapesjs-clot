@@ -273,7 +273,6 @@ export const setSelectState = state => {
 // finish
 export const SendingOpToController = () => {
   // send Op to controller
-  localOp.username = username;
   let CtoS_Msg = {
     sender: username,
     sessionId: sessionId,
@@ -299,8 +298,8 @@ export const SendingOpToController = () => {
 export const ApplyingLocalOp = op => {
   //console.log("state: ApplyingLocalOp");
   // step 1: set localOp to the Op in the received LocalChange event
+  op.username = username;
   localOp = op;
-  localOp.username = username;
 
   // step 2: increment localTS
   localTS += 1;
@@ -319,6 +318,7 @@ export const ApplyingLocalOp = op => {
 export const ApplyingBufferedLocalOp = op => {
   //console.log("state: ApplyingBufferedLocalOp");
   // step 1: add Op from the received LocalChange event to opBuffer
+  op.username = username;
   opBuffer.push(op);
 
   /* don't need
