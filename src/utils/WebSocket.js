@@ -255,7 +255,6 @@ export const setState = state => {
 // finish
 export const SendingOpToController = () => {
   // send Op to controller
-  localOp.username = username;
   let CtoS_Msg = {
     sender: username,
     sessionId: sessionId,
@@ -282,6 +281,7 @@ export const ApplyingLocalOp = op => {
   //console.log("state: ApplyingLocalOp");
   // step 1: set localOp to the Op in the received LocalChange event
   localOp = op;
+  localOp.username = username;
 
   // step 2: increment localTS
   localTS += 1;

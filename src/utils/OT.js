@@ -44,6 +44,7 @@ export const TMM = (tarOp, refOp) => {
     }
   }
 
+  console.log('tarOp.username: ' + tarOp.username + ' refOp.username: ' + refOp.username);
   if (refDstId === tarDstId) {
     if (tarDstIndex > refDstIndex || (tarDstIndex == refDstIndex && tarOp.username > refOp.username)) {
       tarOp.opts.pos.indexEl += 1;
