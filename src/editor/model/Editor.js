@@ -145,6 +145,7 @@ export default class EditorModel extends Model {
    * @private
    */
   loadOnStart(clb = null) {
+    //console.log("EditorModel => loadOnStart")
     const sm = this.get('StorageManager');
 
     // In `onLoad`, the module will try to load the data from its configurations.
@@ -158,6 +159,7 @@ export default class EditorModel extends Model {
       clb && clb();
     };
 
+    //console.log("postLoad", postLoad);
     if (sm && sm.canAutoload()) {
       this.load(postLoad);
     } else {
@@ -712,6 +714,8 @@ export default class EditorModel extends Model {
    * @private
    */
   load(clb = null) {
+    //console.trace();
+    //console.log("EditorModel.js => load")
     this.getCacheLoad(1, res => {
       this.loadData(res);
       clb && clb(res);
@@ -719,6 +723,7 @@ export default class EditorModel extends Model {
   }
 
   loadData(data = {}) {
+    //console.log("EditorModel.js => loadData")
     const sm = this.get('StorageManager');
     const result = sm.__clearKeys(data);
 
@@ -738,6 +743,7 @@ export default class EditorModel extends Model {
    * @private
    */
   getCacheLoad(force, clb) {
+    //console.log("EditorModel.js => getCacheLoad")
     if (this.cacheLoad && !force) return this.cacheLoad;
     const sm = this.get('StorageManager');
     const load = [];

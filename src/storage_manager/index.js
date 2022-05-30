@@ -258,6 +258,7 @@ export default () => {
      * });
      * */
     load(keys, clb) {
+      //console.log("storage_manager => load")
       const st = this.get(this.getCurrent());
       const keysF = [];
       let result = {};

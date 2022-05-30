@@ -3,7 +3,7 @@ import { hasWin } from 'utils/mixins';
 
 export default Model.extend({
   defaults: {
-    checkLocal: true
+    checkLocal: true,
   },
 
   /**
@@ -21,6 +21,7 @@ export default Model.extend({
    * @private
    */
   load(keys, clb = () => {}) {
+    //console.log("LocalStorage => load");
     const result = {};
 
     if (this.hasLocal()) {
@@ -41,8 +42,7 @@ export default Model.extend({
   remove(keys) {
     if (!this.hasLocal()) return;
 
-    for (let i = 0, len = keys.length; i < len; i++)
-      localStorage.removeItem(keys[i]);
+    for (let i = 0, len = keys.length; i < len; i++) localStorage.removeItem(keys[i]);
   },
 
   /**
@@ -58,5 +58,5 @@ export default Model.extend({
     }
 
     return true;
-  }
+  },
 });

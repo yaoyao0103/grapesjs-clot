@@ -13,7 +13,7 @@ export default Backbone.Model.extend({
     onComplete() {},
     contentTypeJson: false,
     credentials: 'include',
-    fetchOptions: ''
+    fetchOptions: '',
   },
 
   /**
@@ -69,6 +69,7 @@ export default Backbone.Model.extend({
   },
 
   load(keys, clb, clbErr) {
+    //console.log("RemoteStorage => load");
     this.request(this.get('urlLoad'), { method: 'get' }, clb, clbErr);
   },
 
@@ -81,6 +82,14 @@ export default Backbone.Model.extend({
    * @private
    */
   request(url, opts = {}, clb = null, clbErr = null) {
+    //http://localhost:8080/pages/${pageId}/content
+    if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d0') {
+      const noteTextJson = require('./noteTestJson.json');
+      const content = noteTextJson.version[0].content;
+      const text = JSON.stringify(content);
+      this.onResponse(text, clb);
+      return;
+    }
     const typeJson = this.get('contentTypeJson');
     const headers = this.get('headers') || {};
     const params = this.get('params');
@@ -117,7 +126,7 @@ export default Backbone.Model.extend({
     fetchOptions = {
       method: opts.method || 'post',
       credentials: this.get('credentials'),
-      headers
+      headers,
     };
 
     // Body should only be included on POST method
@@ -126,21 +135,22 @@ export default Backbone.Model.extend({
     }
 
     const fetchOpts = this.get('fetchOptions') || {};
-    const addOpts = isFunction(fetchOpts)
-      ? fetchOpts(fetchOptions)
-      : fetchOptions;
+    const addOpts = isFunction(fetchOpts) ? fetchOpts(fetchOptions) : fetchOptions;
 
     this.onStart();
     this.fetch(url, {
       ...fetchOptions,
-      ...(addOpts || {})
+      ...(addOpts || {}),
     })
-      .then(res =>
-        ((res.status / 200) | 0) == 1
-          ? res.text()
-          : res.text().then(text => Promise.reject(text))
-      )
-      .then(text => this.onResponse(text, clb))
+      .then(res => (((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))))
+      .then(text => {
+        // rename 'text' to 'note'
+        /*
+        const content = JSON.parse(note).version[0].content;
+        const text = JSON.stringify(content);
+        */
+        this.onResponse(text, clb);
+      })
       .catch(err => this.onError(err, clbErr));
-  }
+  },
 });
