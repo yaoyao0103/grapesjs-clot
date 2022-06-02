@@ -84,8 +84,30 @@ export default Backbone.Model.extend({
   request(url, opts = {}, clb = null, clbErr = null) {
     //http://localhost:8080/pages/${pageId}/content
     if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d0') {
+      console.log('6262b61b3beec065d67999d0');
       const noteTextJson = require('./noteTestJson.json');
       const content = noteTextJson.version[0].content;
+      const text = JSON.stringify(content);
+      this.onResponse(text, clb);
+      return;
+    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d1') {
+      console.log('6262b61b3beec065d67999d1');
+      const noteTextJson = require('./noteTestJson.json');
+      const content = noteTextJson.version[1].content;
+      const text = JSON.stringify(content);
+      this.onResponse(text, clb);
+      return;
+    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d2') {
+      console.log('6262b61b3beec065d67999d2');
+      const noteTextJson = require('./noteTestJson.json');
+      const content = noteTextJson.version[2].content;
+      const text = JSON.stringify(content);
+      this.onResponse(text, clb);
+      return;
+    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d3') {
+      console.log('6262b61b3beec065d67999d3');
+      const noteTextJson = require('./noteTestJson.json');
+      const content = noteTextJson.version[3].content;
       const text = JSON.stringify(content);
       this.onResponse(text, clb);
       return;
