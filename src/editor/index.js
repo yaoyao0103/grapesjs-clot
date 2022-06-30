@@ -442,6 +442,10 @@ export default (config = {}, opts = {}) => {
       return em.store(clb);
     },
 
+    storeVersion(clb, version) {
+      return em.storeVersion(clb, version);
+    },
+
     /**
      * Get the JSON data object, which could be stored and loaded back with `editor.loadData(json)`
      * @returns {Object}

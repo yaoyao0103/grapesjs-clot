@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import fetch from 'utils/fetch';
 import { isUndefined, isFunction } from 'underscore';
+import axios from 'axios';
 
 export default Backbone.Model.extend({
   fetch,
@@ -68,6 +69,15 @@ export default Backbone.Model.extend({
     this.request(this.get('urlStore'), { body }, clb, clbErr);
   },
 
+  storeVersion(data, version, clb, clbErr) {
+    const body = {};
+    for (let key in data) {
+      body[key] = data[key];
+    }
+
+    this.request(this.get('urlStore'), { body, version }, clb, clbErr);
+  },
+
   load(keys, clb, clbErr) {
     //console.log("RemoteStorage => load");
     this.request(this.get('urlLoad'), { method: 'get' }, clb, clbErr);
@@ -83,7 +93,7 @@ export default Backbone.Model.extend({
    */
   request(url, opts = {}, clb = null, clbErr = null) {
     //http://localhost:8080/pages/${pageId}/content
-    if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d0') {
+    /*if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d0') {
       console.log('6262b61b3beec065d67999d0');
       const noteTextJson = require('./noteTestJson.json');
       const content = noteTextJson.version[0].content;
@@ -111,7 +121,61 @@ export default Backbone.Model.extend({
       const text = JSON.stringify(content);
       this.onResponse(text, clb);
       return;
+    }*/
+
+    /*axios.get(url)
+      .then(res => {
+          const content = res.content[0]
+          const text = JSON.stringify(content);
+          this.onResponse(text, clb);
+          return;
+      })
+      .error(err => {
+          console.log(err)
+      })*/
+    const bodyObj = opts.body || {};
+    //console.log("bodyObj",bodyObj)
+    const method = opts.method || 'put';
+    //console.log("method",method)
+    const versionNum = opts.version ? opts.version.toString() : '';
+    //console.log("versionNum", versionNum)
+    this.onStart();
+    if (method == 'get') {
+      this.fetch(url, {
+        method: method,
+      })
+        .then(res => (((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))))
+        .then(version => {
+          const temp = JSON.parse(version);
+          const content = temp.res.content[0];
+          const text = JSON.stringify(content);
+          this.onResponse(text, clb);
+        })
+        .catch(err => {
+          console.log('error!!!!', err);
+        });
+    } else if (method == 'put') {
+      axios
+        .get(url + `/${versionNum}`)
+        .then(res => {
+          //console.log(version)
+          const version = res.data.res;
+          version.content = [bodyObj];
+          //console.log("version",version)
+          axios
+            .put(url + `/${versionNum}`, version)
+            .then(res => {
+              console.log(res);
+            })
+            .catch(err => {
+              console.log('error!!!!', err);
+            });
+        })
+        .catch(err => {
+          console.log('error!!!!', err);
+        });
     }
+    /*
     const typeJson = this.get('contentTypeJson');
     const headers = this.get('headers') || {};
     const params = this.get('params');
@@ -167,12 +231,12 @@ export default Backbone.Model.extend({
       .then(res => (((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))))
       .then(text => {
         // rename 'text' to 'note'
-        /*
-        const content = JSON.parse(note).version[0].content;
-        const text = JSON.stringify(content);
-        */
+        
+        //const content = JSON.parse(note).version[0].content;
+        //const text = JSON.stringify(content);
+        
         this.onResponse(text, clb);
       })
-      .catch(err => this.onError(err, clbErr));
+      .catch(err => this.onError(err, clbErr));*/
   },
 });

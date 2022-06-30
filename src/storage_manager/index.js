@@ -245,6 +245,31 @@ export default () => {
         : null;
     },
 
+    storeVersion(data, version, clb) {
+      const st = this.get(this.getCurrent());
+      const toStore = {};
+      this.onStart('store', data);
+
+      for (let key in data) {
+        toStore[c.id + key] = data[key];
+      }
+
+      return st
+        ? st.storeVersion(
+            toStore,
+            version,
+            res => {
+              this.onAfter('store', res);
+              clb && clb(res);
+              this.onEnd('store', res);
+            },
+            err => {
+              this.onError('store', err);
+            }
+          )
+        : null;
+    },
+
     /**
      * Load resource from the current storage by keys
      * @param  {string|Array<string>} keys Keys to load

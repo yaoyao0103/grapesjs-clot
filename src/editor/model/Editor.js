@@ -696,6 +696,20 @@ export default class EditorModel extends Model {
     return store;
   }
 
+  storeVersion(clb, version) {
+    const sm = this.get('StorageManager');
+    if (!sm) return;
+
+    const store = this.storeData();
+    sm.storeVersion(store, version, res => {
+      clb && clb(res, store);
+      this.set('changesCount', 0);
+      this.trigger('storage:store', store);
+    });
+
+    return store;
+  }
+
   storeData() {
     let result = {};
     // Sync content if there is an active RTE
