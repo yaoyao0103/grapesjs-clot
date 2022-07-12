@@ -6,6 +6,7 @@ import { getGlobal } from 'utils/mixins';
 import PluginManager from './plugin_manager';
 import { stompClient, connectWebSocket } from 'utils/WebSocket';
 import CircularJSON from 'circular-json';
+import { isConnected } from './utils/WebSocket';
 
 polyfills();
 
@@ -52,7 +53,11 @@ export default {
    */
   init(config = {}) {
     //console.log('index.js/init()--start');
-    if (!stompClient) connectWebSocket();
+    console.log('isConnected: ', isConnected);
+    if (!isConnected && config.isCollab && config.noteId && config.email && config.username) {
+      console.log('is going to connect!!');
+      connectWebSocket(config.noteId, config.email, config.username, config.setQueue);
+    }
     const { headless } = config;
     const els = config.container;
     if (!els && !headless) throw new Error("'container' is required");

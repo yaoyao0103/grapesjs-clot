@@ -21,8 +21,13 @@ import {
 import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
 
 export var stompClient = null;
+export var email = '';
 export var username = '';
+export var noteId = '';
+export var queue = [];
+export var isConnected = false;
 var sessionId = '';
+var setQueue;
 export const ClientStateEnum = {
   Synced: 1,
   AwaitingACK: 2,
@@ -46,8 +51,15 @@ var remoteOpPrime = null;
 var opBuffer = new Array();
 var initBuffer = new Array();
 
-export const connectWebSocket = () => {
-  username = makeId(5);
+export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQueue) => {
+  //username = makeId(5);
+  email = tempEmail;
+  noteId = tempNoteId;
+  username = tempUsername;
+  setQueue = tempSetQueue;
+  console.log('Email:', email);
+  console.log('username:', username);
+  console.log('NoteId:', noteId);
   let socket = new SockJS('http://localhost:8081/websocket');
   stompClient = Stomp.over(socket);
   stompClient.connect({}, onConnected, onError);
@@ -55,22 +67,26 @@ export const connectWebSocket = () => {
 
 const onConnected = () => {
   // Subscribe to the Public Topic
-  stompClient.subscribe('/topic/public', onMessageReceived);
+  //stompClient.subscribe('/topic/public', onMessageReceived);
+  // Todo
+  stompClient.subscribe(`/topic/public/${noteId}`, onMessageReceived);
+
   //console.log("session id: ", sessionId);
-  stompClient.subscribe('/user/' + username + '/msg', onMessageReceived);
+  stompClient.subscribe('/user/' + email + '/msg', onMessageReceived);
   // Tell your username to the server
-  stompClient.send('/app/chat.register', {}, JSON.stringify({ sender: username, type: 'JOIN' }));
+  //stompClient.send('/app/chat.register', {}, JSON.stringify({ sender: email, type: 'JOIN' }));
+
+  // Todo
+  stompClient.send(
+    `/app/chat.register/${noteId}`,
+    {},
+    JSON.stringify({ senderName: username, senderEmail: email, type: 'JOIN', noteId: noteId })
+  );
+  isConnected = true;
 };
 
-// make random id
-const makeId = length => {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
+export const setIsConnected = flag => {
+  isConnected = flag;
 };
 
 const onError = () => {
@@ -79,45 +95,60 @@ const onError = () => {
 
 const onMessageReceived = async payload => {
   let StoC_msg = CircularJSON.parse(payload.body);
-
+  console.log(StoC_msg.senderEmail + '  v.s. ' + email);
   if (StoC_msg.type === 'JOIN') {
-    if (StoC_msg.sender === username) {
+    if (StoC_msg.senderEmail === email) {
       sessionId = StoC_msg.sessionId;
+      let queueStr = StoC_msg.queue;
+      queue = queueStr.split(' ');
+      setQueue(queue);
       let clientNum = parseInt(StoC_msg.op);
       if (clientNum == 1) {
         // set state to Synced
         ClientState = ClientStateEnum.Synced;
+        console.log('state: Synced');
       }
       //stompClient.subscribe('/user/' + sessionId + '/msg', onMessageReceived);
     }
     // join msg of other clients
     else {
-      let wrapper = myEditor.getWrapper();
-      let components = myEditor.getComponents();
-      let style = myEditor.getStyle();
-      setComponentIds(components);
-      checkComponentsChooser(components);
+      console.log('someone join!!', StoC_msg.senderEmail);
+      // Todo: get and set the queue
+      let queueStr = StoC_msg.queue;
+      queue = queueStr.split(' ');
+      setQueue(queue);
+      if (queue[0] == email) {
+        let wrapper = myEditor.getWrapper();
+        let components = myEditor.getComponents();
+        let style = myEditor.getStyle();
+        setComponentIds(components);
+        checkComponentsChooser(components);
 
-      let id = wrapper.get('attributes').id;
-      let op = {
-        action: 'copy-wrapper',
-        opts: {
-          components: components,
-          style: style,
-          id: id,
-        },
-      };
-      let CtoS_Msg = {
-        sender: username,
-        sessionId: sessionId,
-        type: 'COPY',
-        ts: localTS,
-        op: CircularJSON.stringify(op),
-      };
-      stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
+        let id = wrapper.get('attributes').id;
+        let op = {
+          action: 'copy-wrapper',
+          opts: {
+            components: components,
+            style: style,
+            id: id,
+          },
+        };
+        let CtoS_Msg = {
+          senderName: username,
+          senderEmail: email,
+          sessionId: sessionId,
+          type: 'COPY',
+          ts: localTS,
+          op: CircularJSON.stringify(op),
+          newcomer: StoC_msg.senderEmail,
+          noteId: noteId,
+        };
+        //stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
+        stompClient.send(`/app/chat.send/${noteId}`, {}, CircularJSON.stringify(CtoS_Msg));
 
-      console.log('send copy!');
-      console.log('state: ' + ClientState);
+        console.log('send copy!');
+        console.log('state: ' + ClientState);
+      }
     }
   } else if (StoC_msg.type === 'COPY') {
     // handle it only when the state is EditorInitializing (newly client)
@@ -151,8 +182,12 @@ const onMessageReceived = async payload => {
     }
   } else if (StoC_msg.type === 'LEAVE') {
     let components = myEditor.getComponents();
-    console.log('sender', StoC_msg.sender);
-    setComponentRemoteUnSelected(components, StoC_msg.sender);
+    console.log('leaver', StoC_msg.senderEmail);
+    setComponentRemoteUnSelected(components, StoC_msg.senderName);
+    // Todo: get the queue and set it
+    let queueStr = StoC_msg.queue;
+    queue = queueStr.split(' ');
+    setQueue(queue);
   } else if (StoC_msg.type === 'ACK') {
     //-------------------------- State: AwaitingACK ------------------------------
     if (ClientState == ClientStateEnum.AwaitingACK) {
@@ -255,14 +290,17 @@ export const setState = state => {
 // finish
 export const SendingOpToController = () => {
   // send Op to controller
+  console.log('Send!!!!!!!!!!!!!!!!!!!!!!!!!');
   let CtoS_Msg = {
-    sender: username,
+    senderName: username,
+    senderEmail: email,
     sessionId: sessionId,
     type: 'OP',
     ts: localTS,
     op: CircularJSON.stringify(localOp),
+    noteId: noteId,
   };
-  stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
+  stompClient.send(`/app/chat.send/${noteId}`, {}, CircularJSON.stringify(CtoS_Msg));
 
   // buffer is empty => AwaitingACK state
   if (opBuffer.length <= 0) {
