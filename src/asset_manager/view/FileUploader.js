@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import fetch from 'utils/fetch';
 import html from 'utils/html';
+import axios from 'axios';
 
 export default Backbone.View.extend(
   {
@@ -87,6 +88,7 @@ export default Backbone.View.extend(
      */
     onUploadResponse(text, clb) {
       const { module, config, target } = this;
+      console.log('onUploadResponse');
       let json;
       try {
         json = typeof text === 'string' ? JSON.parse(text) : text;
@@ -112,7 +114,8 @@ export default Backbone.View.extend(
      * */
     uploadFile(e, clb) {
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-      //console.log('FileUploader.js => uploadFile files:', files);
+      console.log('FileUploader.js => uploadFile files:', files);
+      console.trace();
       const { config } = this;
       const { beforeUpload } = config;
 
@@ -267,7 +270,10 @@ export default Backbone.View.extend(
       // List files dropped
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
       const response = { data: [] };
-
+      //console.log("this.module:", this.module.AssetsView().myFunc())
+      console.log('embedAsBase64 => files: ', files);
+      console.log('embedAsBase64');
+      console.trace();
       // Unlikely, widely supported now
       if (!FileReader) {
         this.onUploadError(new Error('Unsupported platform, FileReader is not defined'));
@@ -278,6 +284,7 @@ export default Backbone.View.extend(
       const mimeTypeMatcher = /^(.+)\/(.+)$/;
 
       for (const file of files) {
+        console.log('embedAsBase64 => file: ', file);
         // For each file a reader (to read the base64 URL)
         // and a promise (to track and merge results and errors)
         const promise = new Promise((resolve, reject) => {
@@ -315,7 +322,16 @@ export default Backbone.View.extend(
            */
 
             // If it's an image, try to find its size
-            if (type === 'image') {
+            axios
+              .put('http://localhost:8080/picture/imgur', { base64: reader.result.split(',')[1] })
+              .then(res => {
+                let link = res.data.link;
+                this.module.AssetsView().handleFileUpload(link);
+              })
+              .catch(err => {
+                console.log(err);
+              });
+            /*if (type === 'image') {
               const data = {
                 src: reader.result,
                 name,
@@ -344,7 +360,7 @@ export default Backbone.View.extend(
             } else {
               // No type found, resolve with the URL only
               resolve(reader.result);
-            }
+            }*/
           });
           reader.addEventListener('error', error => {
             reject(error);
@@ -359,7 +375,7 @@ export default Backbone.View.extend(
         promises.push(promise);
       }
 
-      Promise.all(promises).then(
+      /*Promise.all(promises).then(
         data => {
           response.data = data;
           this.onUploadResponse(response, clb);
@@ -367,7 +383,7 @@ export default Backbone.View.extend(
         error => {
           this.onUploadError(error);
         }
-      );
+      );*/
     },
   }
 );

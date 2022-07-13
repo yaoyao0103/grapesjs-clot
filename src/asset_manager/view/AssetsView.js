@@ -2,7 +2,7 @@ import Backbone from 'backbone';
 
 export default Backbone.View.extend({
   events: {
-    submit: 'handleSubmit'
+    submit: 'handleSubmit',
   },
 
   template({ pfx, ppfx, em, ...view }) {
@@ -13,8 +13,7 @@ export default Backbone.View.extend({
             <div class="${ppfx}field ${pfx}add-field">
               <input placeholder="${em && em.t('assetManager.inputPlh')}"/>
             </div>
-            <button class="${ppfx}btn-prim">${em &&
-        em.t('assetManager.addButton')}</button>
+            <button class="${ppfx}btn-prim">${em && em.t('assetManager.addButton')}</button>
             <div style="clear:both"></div>
           </form>
       `;
@@ -44,6 +43,21 @@ export default Backbone.View.extend({
     this.listenTo(coll, 'deselectAll', this.deselectAll);
   },
 
+  handleFileUpload(url) {
+    console.log('handleSubmit => url: ', url);
+    const handleAdd = this.config.handleAdd;
+
+    if (!url) {
+      return;
+    }
+    this.getAssetsEl().scrollTop = 0;
+
+    if (handleAdd) {
+      handleAdd.bind(this)(url);
+    } else {
+      this.options.globalCollection.add(url, { at: 0 });
+    }
+  },
   /**
    * Add new asset to the collection via string
    * @param {Event} e Event object
@@ -54,6 +68,7 @@ export default Backbone.View.extend({
     e.preventDefault();
     const input = this.getAddInput();
     const url = input && input.value.trim();
+    console.log('handleSubmit => url: ', url);
     const handleAdd = this.config.handleAdd;
 
     if (!url) {
@@ -86,8 +101,7 @@ export default Backbone.View.extend({
    * @private
    */
   getAddInput() {
-    if (!this.inputUrl || !this.inputUrl.value)
-      this.inputUrl = this.el.querySelector(`.${this.pfx}add-asset input`);
+    if (!this.inputUrl || !this.inputUrl.value) this.inputUrl = this.el.querySelector(`.${this.pfx}add-asset input`);
     return this.inputUrl;
   },
 
@@ -121,13 +135,16 @@ export default Backbone.View.extend({
    * @private
    * */
   addAsset(model, fragmentEl = null) {
+    console.log('addAsset => AssetsView.js');
+    console.trace();
+    console.log('model: ', model);
     const fragment = fragmentEl;
     const collection = this.collection;
     const config = this.config;
     const rendered = new model.typeView({
       model,
       collection,
-      config
+      config,
     }).render().el;
 
     if (fragment) {
@@ -183,5 +200,5 @@ export default Backbone.View.extend({
     this.el.className = `${this.ppfx}asset-manager`;
     this.renderAssets();
     return this;
-  }
+  },
 });
