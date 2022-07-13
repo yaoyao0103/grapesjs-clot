@@ -66,6 +66,8 @@ export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQue
 };
 
 const onConnected = () => {
+  ClientState = ClientStateEnum.EditorInitializing;
+  localTS = 0;
   // Subscribe to the Public Topic
   //stompClient.subscribe('/topic/public', onMessageReceived);
   // Todo

@@ -137,7 +137,7 @@ export default Backbone.Model.extend({
     //console.log("bodyObj",bodyObj)
     const method = opts.method || 'put';
     //console.log("method",method)
-    const versionNum = opts.version ? opts.version.toString() : '';
+    const versionNum = opts.version ? opts.version.toString() : '0';
     //console.log("versionNum", versionNum)
     this.onStart();
     if (method == 'get') {
