@@ -157,6 +157,7 @@ export default (config = {}, opts = {}) => {
     },
 
     setPreviewMode() {
+      let on = 1;
       const canvas = em.get('Canvas');
       const body = canvas.getBody();
       const tlb = canvas.getToolbarEl();
