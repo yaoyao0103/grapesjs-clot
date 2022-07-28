@@ -60,6 +60,7 @@ import EditorView from './view/EditorView';
 import html from 'utils/html';
 import CircularJSON from 'circular-json';
 import { sendLeave } from 'utils/WebSocket';
+import { each } from 'underscore';
 
 export default (config = {}, opts = {}) => {
   const { $ } = opts;
