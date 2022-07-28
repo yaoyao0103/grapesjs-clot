@@ -59,7 +59,7 @@ import EditorModel from './model/Editor';
 import EditorView from './view/EditorView';
 import html from 'utils/html';
 import CircularJSON from 'circular-json';
-import { stompClient, setIsConnected } from 'utils/WebSocket';
+import { sendLeave } from 'utils/WebSocket';
 
 export default (config = {}, opts = {}) => {
   const { $ } = opts;
@@ -149,12 +149,21 @@ export default (config = {}, opts = {}) => {
 
     disconnectWS() {
       try {
-        stompClient.disconnect();
-        setIsConnected(false);
+        sendLeave();
       } catch (e) {
         console.log('err: ', e);
         console.log('not connected!!!');
       }
+    },
+
+    setPreviewMode() {
+      const canvas = em.get('Canvas');
+      const body = canvas.getBody();
+      const tlb = canvas.getToolbarEl();
+      tlb && (tlb.style.display = on ? 'none' : '');
+      const elP = body.querySelectorAll(`.${this.ppfx}no-pointer`);
+      each(elP, item => (item.style.pointerEvents = on ? 'all' : ''));
+      em['on']('run:tlb-move:before', this.preventDrag);
     },
 
     /**

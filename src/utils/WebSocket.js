@@ -50,6 +50,8 @@ var localOpPrime = null;
 var remoteOpPrime = null;
 var opBuffer = new Array();
 var initBuffer = new Array();
+var topic = null;
+var privateMsg = null;
 
 export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQueue) => {
   //username = makeId(5);
@@ -60,9 +62,20 @@ export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQue
   console.log('Email:', email);
   console.log('username:', username);
   console.log('NoteId:', noteId);
-  let socket = new SockJS('http://localhost:8081/websocket');
-  stompClient = Stomp.over(socket);
-  stompClient.connect({}, onConnected, onError);
+  if (!stompClient) {
+    let socket = new SockJS('http://localhost:8080/websocket');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected, onError);
+  } else {
+    topic = stompClient.subscribe(`/topic/public/${noteId}`, onMessageReceived);
+    privateMsg = stompClient.subscribe(`/user/${email}/msg`, onMessageReceived);
+    stompClient.send(
+      `/app/chat.register/${noteId}`,
+      {},
+      JSON.stringify({ senderName: username, senderEmail: email, type: 'JOIN', noteId: noteId })
+    );
+    isConnected = true;
+  }
 };
 
 const onConnected = () => {
@@ -71,10 +84,8 @@ const onConnected = () => {
   // Subscribe to the Public Topic
   //stompClient.subscribe('/topic/public', onMessageReceived);
   // Todo
-  stompClient.subscribe(`/topic/public/${noteId}`, onMessageReceived);
-
-  //console.log("session id: ", sessionId);
-  stompClient.subscribe('/user/' + email + '/msg', onMessageReceived);
+  topic = stompClient.subscribe(`/topic/public/${noteId}`, onMessageReceived);
+  privateMsg = stompClient.subscribe(`/user/${email}/msg`, onMessageReceived);
   // Tell your username to the server
   //stompClient.send('/app/chat.register', {}, JSON.stringify({ sender: email, type: 'JOIN' }));
 
@@ -89,6 +100,17 @@ const onConnected = () => {
 
 export const setIsConnected = flag => {
   isConnected = flag;
+};
+
+export const sendLeave = () => {
+  topic.unsubscribe();
+  privateMsg.unsubscribe();
+  stompClient.send(
+    `/app/chat.send/${noteId}`,
+    {},
+    JSON.stringify({ senderName: username, senderEmail: email, type: 'LEAVE', noteId: noteId })
+  );
+  isConnected = false;
 };
 
 const onError = () => {

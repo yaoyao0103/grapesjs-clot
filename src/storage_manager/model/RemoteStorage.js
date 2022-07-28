@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 import fetch from 'utils/fetch';
 import { isUndefined, isFunction } from 'underscore';
 import axios from 'axios';
+import Cookie from '../../utils/Cookie';
 
 export default Backbone.Model.extend({
   fetch,
@@ -138,11 +139,17 @@ export default Backbone.Model.extend({
     const method = opts.method || 'put';
     //console.log("method",method)
     const versionNum = opts.version ? opts.version.toString() : '0';
+    const cookieParser = new Cookie(document.cookie);
+    console.log('token', cookieParser.getCookieByName('token'));
+
     //console.log("versionNum", versionNum)
     this.onStart();
     if (method == 'get') {
       this.fetch(url, {
         method: method,
+        headers: {
+          Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+        },
       })
         .then(res => (((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))))
         .then(version => {
@@ -156,14 +163,22 @@ export default Backbone.Model.extend({
         });
     } else if (method == 'put') {
       axios
-        .get(url + `/${versionNum}`)
+        .get(url + `/${versionNum}`, {
+          headers: {
+            Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+          },
+        })
         .then(res => {
           //console.log(version)
           const version = res.data.res;
           version.content = [bodyObj];
           //console.log("version",version)
           axios
-            .put(url + `/${versionNum}`, version)
+            .put(url + `/${versionNum}`, version, {
+              headers: {
+                Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+              },
+            })
             .then(res => {
               console.log(res);
             })
