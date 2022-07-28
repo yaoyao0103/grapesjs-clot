@@ -158,6 +158,7 @@ export default (config = {}, opts = {}) => {
     },
 
     setPreviewMode() {
+      const cmdVis = 'sw-visibility';
       let editor = em.getEditor();
       if (!this.shouldRunSwVisibility) {
         this.shouldRunSwVisibility = editor.Commands.isActive(cmdVis);
