@@ -4,6 +4,7 @@ import $ from 'utils/cash-dom';
 import Extender from 'utils/extender';
 import { getModel, hasWin } from 'utils/mixins';
 import { Model } from 'common';
+import { each } from 'underscore';
 import Selected from './Selected';
 import {
   username,

@@ -15,8 +15,7 @@ export default {
     opts.abort = 1;
   },
 
-  tglEffects(on) {
-    const { em } = this;
+  tglEffects(on, em = null) {
     const mthEv = on ? 'on' : 'off';
     if (em) {
       const canvas = em.get('Canvas');
@@ -46,7 +45,7 @@ export default {
     const editorEl = editor.getEl();
     const pfx = editor.Config.stylePrefix;
 
-    if (!this.helper) {
+    /*if (!this.helper) {
       const helper = document.createElement('span');
       helper.className = `${pfx}off-prv fa fa-eye-slash`;
       editorEl.appendChild(helper);
@@ -56,7 +55,7 @@ export default {
 
     this.helper.style.display = 'inline-block';
 
-    panels.forEach(panel => panel.set('visible', false));
+    panels.forEach(panel => panel.set('visible', false));*/
 
     const canvasS = canvas.style;
     canvasS.width = '100%';
@@ -66,7 +65,7 @@ export default {
     canvasS.padding = '0';
     canvasS.margin = '0';
     editor.refresh();
-    this.tglEffects(1);
+    this.tglEffects(1, editor.getModel());
   },
 
   stop(editor) {
@@ -92,6 +91,6 @@ export default {
     }
 
     editor.refresh();
-    this.tglEffects();
-  }
+    this.tglEffects(0, editor.getModel());
+  },
 };

@@ -100,7 +100,6 @@ export default {
     wrapper.set('attributes', { id: 'Hello!' });
     myEditor = editor;
     myCurrentFrame = myEditor.getModel().getCurrentFrame();
-    //console.log('index.js/init()--end');
     return editor;
   },
 };

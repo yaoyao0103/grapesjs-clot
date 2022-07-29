@@ -157,52 +157,6 @@ export default (config = {}, opts = {}) => {
       }
     },
 
-    setPreviewMode() {
-      const cmdVis = 'sw-visibility';
-      let editor = em.getEditor();
-      if (!this.shouldRunSwVisibility) {
-        this.shouldRunSwVisibility = editor.Commands.isActive(cmdVis);
-      }
-
-      this.shouldRunSwVisibility && editor.stopCommand(cmdVis);
-      editor.getModel().stopDefault();
-
-      const panels = this.getPanels(editor);
-      const canvas = editor.Canvas.getElement();
-      const editorEl = editor.getEl();
-      const pfx = editor.Config.stylePrefix;
-
-      if (!this.helper) {
-        const helper = document.createElement('span');
-        helper.className = `${pfx}off-prv fa fa-eye-slash`;
-        editorEl.appendChild(helper);
-        helper.onclick = () => this.stopCommand();
-        this.helper = helper;
-      }
-
-      this.helper.style.display = 'inline-block';
-
-      panels.forEach(panel => panel.set('visible', false));
-
-      const canvasS = canvas.style;
-      canvasS.width = '100%';
-      canvasS.height = '100%';
-      canvasS.top = '0';
-      canvasS.left = '0';
-      canvasS.padding = '0';
-      canvasS.margin = '0';
-      editor.refresh();
-
-      let on = 1;
-      const canvass = em.get('Canvas');
-      const body = canvass.getBody();
-      const tlb = canvass.getToolbarEl();
-      tlb && (tlb.style.display = on ? 'none' : '');
-      const elP = body.querySelectorAll(`.${this.ppfx}no-pointer`);
-      each(elP, item => (item.style.pointerEvents = on ? 'all' : ''));
-      em['on']('run:tlb-move:before', this.preventDrag);
-    },
-
     /**
      * Returns configuration object
      * @param  {string} [prop] Property name
