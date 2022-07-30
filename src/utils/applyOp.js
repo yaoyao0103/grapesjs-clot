@@ -83,3 +83,9 @@ export const applyRemoveSelected = opts => {
     model.set('chooser', '');
   }
 };
+
+export const applySetImageSrc = opts => {
+  let model = myEditor.getModel().get('DomComponents').getById(opts.id);
+  let src = opts.src;
+  model.set({ src: src });
+};

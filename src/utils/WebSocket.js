@@ -16,6 +16,7 @@ import {
   applyUpdateContent,
   applyAddSelected,
   applyRemoveSelected,
+  applySetImageSrc,
 } from './applyOp.js';
 
 import { TMD, TMM, TMA, TAD, TAM, TAA } from './OT.js';
@@ -285,6 +286,7 @@ const applyOp = (action, opts) => {
     applyDeleteComponent(myEditor.getModel().getEditor(), opts);
   } else if (action === 'add-component') {
     if (!opts.dropContent) return;
+    console.log('valid op!');
     droppable.applyAppendOrMoveComponent(opts, 'add-component');
     let components = myEditor.getComponents();
     setComponentIds(components);
@@ -303,6 +305,8 @@ const applyOp = (action, opts) => {
     applyUpdateTrait(opts);
   } else if (action === 'update-style') {
     myEditor.getModel().get('StyleManager').applyUpdateStyle(opts);
+  } else if (action === 'set-image-src') {
+    applySetImageSrc(opts);
   }
 };
 

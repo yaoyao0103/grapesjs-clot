@@ -1968,7 +1968,7 @@ Component.prototype.defaults = {
   unstylable: '',
   highlightable: true,
   copyable: true,
-  resizable: false,
+  resizable: true,
   editable: false,
   layerable: true,
   selectable: true,

@@ -417,9 +417,7 @@ export default () => {
 
     // be called when applying remote op
     applyUpdateStyle(opts) {
-      console.log('opts', opts);
       let target = this.em.get('DomComponents').getById(opts.id);
-      console.log('target', target);
       target.addStyle(opts.style, opts.opts);
     },
 

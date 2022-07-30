@@ -128,8 +128,6 @@ export default () => {
     },
 
     __propEv(ev, ...data) {
-      console.log('__propEv', ev);
-      console.trace();
       this.em.trigger(ev, ...data);
       this.getAll().trigger(ev, ...data);
     },

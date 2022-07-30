@@ -4,6 +4,13 @@ import { on, off, getUnitFromValue, isTaggableNode, getViewEl, hasWin } from 'ut
 import { isVisible, isDoc } from 'utils/dom';
 import ToolbarView from 'dom_components/view/ToolbarView';
 import Toolbar from 'dom_components/model/Toolbar';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 const $ = Backbone.$;
 let showOffsets;
@@ -439,7 +446,7 @@ export default {
             return;
           }
 
-          const { store, selectedHandler, config } = options;
+          const { store, selectedHandler, config, id } = options;
           const { keyHeight, keyWidth, autoHeight, autoWidth, unitWidth, unitHeight } = config;
           const onlyHeight = ['tc', 'bc'].indexOf(selectedHandler) >= 0;
           const onlyWidth = ['cl', 'cr'].indexOf(selectedHandler) >= 0;
@@ -460,6 +467,32 @@ export default {
           const updateEvent = `update:component:style`;
           const eventToListen = `${updateEvent}:${keyHeight} ${updateEvent}:${keyWidth}`;
           em && em.trigger(eventToListen, null, null, { noEmit: 1 });
+
+          if (store) {
+            let opOpts = {
+              id: id,
+              style: style,
+            };
+            let op = {
+              action: 'update-style',
+              opts: opOpts,
+            };
+
+            if (ClientState == ClientStateEnum.Synced) {
+              // set state to ApplyingLocalOp
+              setState(ClientStateEnum.ApplyingLocalOp);
+              // increase localTS and set localOp
+              ApplyingLocalOp(op);
+            } else if (
+              ClientState == ClientStateEnum.AwaitingACK ||
+              ClientState == ClientStateEnum.AwaitingWithBuffer
+            ) {
+              // set state to ApplyingBufferedLocalOp
+              setState(ClientStateEnum.ApplyingBufferedLocalOp);
+              // push the op to buffer
+              ApplyingBufferedLocalOp(op);
+            }
+          }
         },
       };
 

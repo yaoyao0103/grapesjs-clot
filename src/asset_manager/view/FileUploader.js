@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 import fetch from 'utils/fetch';
 import html from 'utils/html';
 import axios from 'axios';
+import Cookie from '../../utils/Cookie';
 
 export default Backbone.View.extend(
   {
@@ -88,7 +89,6 @@ export default Backbone.View.extend(
      */
     onUploadResponse(text, clb) {
       const { module, config, target } = this;
-      console.log('onUploadResponse');
       let json;
       try {
         json = typeof text === 'string' ? JSON.parse(text) : text;
@@ -114,8 +114,6 @@ export default Backbone.View.extend(
      * */
     uploadFile(e, clb) {
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-      console.log('FileUploader.js => uploadFile files:', files);
-      console.trace();
       const { config } = this;
       const { beforeUpload } = config;
 
@@ -270,10 +268,6 @@ export default Backbone.View.extend(
       // List files dropped
       const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
       const response = { data: [] };
-      //console.log("this.module:", this.module.AssetsView().myFunc())
-      console.log('embedAsBase64 => files: ', files);
-      console.log('embedAsBase64');
-      console.trace();
       // Unlikely, widely supported now
       if (!FileReader) {
         this.onUploadError(new Error('Unsupported platform, FileReader is not defined'));
@@ -282,9 +276,9 @@ export default Backbone.View.extend(
 
       const promises = [];
       const mimeTypeMatcher = /^(.+)\/(.+)$/;
+      const cookieParser = new Cookie(document.cookie);
 
       for (const file of files) {
-        console.log('embedAsBase64 => file: ', file);
         // For each file a reader (to read the base64 URL)
         // and a promise (to track and merge results and errors)
         const promise = new Promise((resolve, reject) => {
@@ -323,7 +317,15 @@ export default Backbone.View.extend(
 
             // If it's an image, try to find its size
             axios
-              .put('http://localhost:8080/picture/imgur', { base64: reader.result.split(',')[1] })
+              .put(
+                'http://localhost:8080/picture/imgur',
+                { base64: reader.result.split(',')[1] },
+                {
+                  headers: {
+                    Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+                  },
+                }
+              )
               .then(res => {
                 let link = res.data.link;
                 this.module.AssetsView().handleFileUpload(link);

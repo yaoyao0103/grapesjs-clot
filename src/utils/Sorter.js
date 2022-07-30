@@ -1044,6 +1044,7 @@ export default Backbone.View.extend({
   },
 
   myMove(paramOpts, action) {
+    console.log('paramOpts', paramOpts);
     const domc = this.em.get('DomComponents');
     const { em, dropContent } = this;
     let dst = paramOpts.dst;

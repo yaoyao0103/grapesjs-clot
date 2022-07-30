@@ -44,7 +44,6 @@ export default Backbone.View.extend({
   },
 
   handleFileUpload(url) {
-    console.log('handleSubmit => url: ', url);
     const handleAdd = this.config.handleAdd;
 
     if (!url) {
@@ -68,7 +67,6 @@ export default Backbone.View.extend({
     e.preventDefault();
     const input = this.getAddInput();
     const url = input && input.value.trim();
-    console.log('handleSubmit => url: ', url);
     const handleAdd = this.config.handleAdd;
 
     if (!url) {
@@ -135,9 +133,6 @@ export default Backbone.View.extend({
    * @private
    * */
   addAsset(model, fragmentEl = null) {
-    console.log('addAsset => AssetsView.js');
-    console.trace();
-    console.log('model: ', model);
     const fragment = fragmentEl;
     const collection = this.collection;
     const config = this.config;

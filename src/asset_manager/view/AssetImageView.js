@@ -1,12 +1,19 @@
 import { isFunction } from 'underscore';
 import AssetView from './AssetView';
 import html from 'utils/html';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 export default AssetView.extend({
   events: {
     'click [data-toggle=asset-remove]': 'onRemove',
     click: 'onClick',
-    dblclick: 'onDblClick'
+    dblclick: 'onDblClick',
   },
 
   getPreview() {
@@ -51,6 +58,25 @@ export default AssetView.extend({
 
     if (isFunction(select)) {
       select(model, false);
+      let op = {};
+      let opOpts = {
+        src: model.getSrc(),
+        id: this.collection.target.ccid,
+      };
+      op.opts = opOpts;
+      op.action = 'set-image-src';
+
+      if (ClientState == ClientStateEnum.Synced) {
+        // set state to ApplyingLocalOp
+        setState(ClientStateEnum.ApplyingLocalOp);
+        // increase localTS and set localOp
+        ApplyingLocalOp(op);
+      } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+        // set state to ApplyingBufferedLocalOp
+        setState(ClientStateEnum.ApplyingBufferedLocalOp);
+        // push the op to buffer
+        ApplyingBufferedLocalOp(op);
+      }
     } else if (isFunction(onClick)) {
       onClick(model);
     } else {
@@ -86,5 +112,5 @@ export default AssetView.extend({
   onRemove(e) {
     e.stopImmediatePropagation();
     this.model.collection.remove(this.model);
-  }
+  },
 });

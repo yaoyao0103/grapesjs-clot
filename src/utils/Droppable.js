@@ -242,6 +242,7 @@ export default class Droppable {
 
   // be called when applying remote op
   applyAppendOrMoveComponent(opts = {}, action) {
+    console.log('opts', opts);
     const { em } = this;
     const utils = em.get('Utils');
     const canvas = em.get('Canvas');
