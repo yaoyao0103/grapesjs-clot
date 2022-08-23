@@ -189,6 +189,7 @@ const onMessageReceived = async payload => {
         wrapper.set('attributes', { id: opts.id });
         myEditor.setComponents(opts.components);
         myEditor.setStyle(opts.style);
+        console.log('-----opts------:', opts);
 
         while (initBuffer.length != 0) {
           let msg = initBuffer.shift();
