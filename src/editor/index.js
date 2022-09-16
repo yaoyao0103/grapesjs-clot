@@ -153,7 +153,7 @@ export default (config = {}, opts = {}) => {
         sendLeave();
       } catch (e) {
         console.log('err: ', e);
-        console.log('not connected!!!');
+        //console.log('not connected!!!');
       }
     },
 

@@ -15,7 +15,9 @@ export const getComponentIds = (cmp, res = []) => {
 export const setComponentIds = cmp => {
   const cmps = isArray(cmp) || isFunction(cmp.map) ? cmp : [cmp];
   cmps.map(cmp => {
-    cmp.set('attributes', { id: cmp.getId() });
+    let attributes = cmp.get('attributes');
+    attributes.id = cmp.getId();
+    cmp.set('attributes', attributes);
     setComponentIds(cmp.components().models);
   });
 };

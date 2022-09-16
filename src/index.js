@@ -53,10 +53,10 @@ export default {
    */
   init(config = {}) {
     //console.log('index.js/init()--start');
-    console.log('isConnected: ', isConnected);
+    //console.log('isConnected: ', isConnected);
     if (!isConnected && config.isCollab && config.noteId && config.email && config.username) {
-      console.log('is going to connect!!');
-      connectWebSocket(config.noteId, config.email, config.username, config.setQueue);
+      //console.log('is going to connect!!');
+      connectWebSocket(config.noteId, config.email, config.username, config.setQueue, config.url);
     }
     const { headless } = config;
     const els = config.container;

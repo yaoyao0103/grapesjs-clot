@@ -277,6 +277,7 @@ export default Backbone.View.extend(
       const promises = [];
       const mimeTypeMatcher = /^(.+)\/(.+)$/;
       const cookieParser = new Cookie(document.cookie);
+      const url = this.em.config.url;
 
       for (const file of files) {
         // For each file a reader (to read the base64 URL)
@@ -318,7 +319,7 @@ export default Backbone.View.extend(
             // If it's an image, try to find its size
             axios
               .put(
-                'http://localhost:8080/picture/imgur',
+                `${url}picture/imgur`,
                 { base64: reader.result.split(',')[1] },
                 {
                   headers: {

@@ -962,7 +962,6 @@ export default class Component extends Model.extend(Styleable) {
    * someComponent.append(otherComponent, { at: 0 });
    */
   append(components, opts = {}) {
-    //console.log('Component.js => append start');
     const compArr = isArray(components) ? components : [components];
     const toAppend = compArr.map(comp => {
       if (isString(comp)) {
@@ -974,7 +973,7 @@ export default class Component extends Model.extend(Styleable) {
       }
     });
     const result = this.components().add(toAppend, opts);
-    //console.log('Component.js => append end');
+
     return isArray(result) ? result : [result];
   }
 

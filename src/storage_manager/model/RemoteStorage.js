@@ -93,54 +93,12 @@ export default Backbone.Model.extend({
    * @private
    */
   request(url, opts = {}, clb = null, clbErr = null) {
-    //http://localhost:8080/pages/${pageId}/content
-    /*if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d0') {
-      console.log('6262b61b3beec065d67999d0');
-      const noteTextJson = require('./noteTestJson.json');
-      const content = noteTextJson.version[0].content;
-      const text = JSON.stringify(content);
-      this.onResponse(text, clb);
-      return;
-    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d1') {
-      console.log('6262b61b3beec065d67999d1');
-      const noteTextJson = require('./noteTestJson.json');
-      const content = noteTextJson.version[1].content;
-      const text = JSON.stringify(content);
-      this.onResponse(text, clb);
-      return;
-    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d2') {
-      console.log('6262b61b3beec065d67999d2');
-      const noteTextJson = require('./noteTestJson.json');
-      const content = noteTextJson.version[2].content;
-      const text = JSON.stringify(content);
-      this.onResponse(text, clb);
-      return;
-    } else if (url.substring(28).split('/')[0] == '6262b61b3beec065d67999d3') {
-      console.log('6262b61b3beec065d67999d3');
-      const noteTextJson = require('./noteTestJson.json');
-      const content = noteTextJson.version[3].content;
-      const text = JSON.stringify(content);
-      this.onResponse(text, clb);
-      return;
-    }*/
-
-    /*axios.get(url)
-      .then(res => {
-          const content = res.content[0]
-          const text = JSON.stringify(content);
-          this.onResponse(text, clb);
-          return;
-      })
-      .error(err => {
-          console.log(err)
-      })*/
     const bodyObj = opts.body || {};
     //console.log("bodyObj",bodyObj)
     const method = opts.method || 'put';
     //console.log("method",method)
     const versionNum = opts.version ? opts.version.toString() : '0';
     const cookieParser = new Cookie(document.cookie);
-    console.log('token', cookieParser.getCookieByName('token'));
 
     //console.log("versionNum", versionNum)
     this.onStart();
@@ -180,7 +138,7 @@ export default Backbone.Model.extend({
               },
             })
             .then(res => {
-              console.log(res);
+              //console.log(res);
             })
             .catch(err => {
               console.log('error!!!!', err);

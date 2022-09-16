@@ -22,7 +22,6 @@ class Cookie {
 
   getCookieByName(name) {
     var value = this.parseCookie(this.cookie)[name];
-    console.log();
     if (value) {
       value = decodeURIComponent(value);
     }

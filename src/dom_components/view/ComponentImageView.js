@@ -29,7 +29,6 @@ export default ComponentView.extend({
 
     if (file && em) {
       const fu = em.get('AssetManager').FileUploader();
-      console.log('ComponentImageView.js => fetchFile');
       fu?.uploadFile({ dataTransfer: { files: [file] } }, res => {
         const obj = res && res.data && res.data[0];
         const src = obj && (isString(obj) ? obj : obj.src);

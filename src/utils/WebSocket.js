@@ -3,6 +3,8 @@ import SockJS from 'sockjs-client';
 import { myEditor } from '../index.js';
 import { parse, stringify } from 'flatted';
 import CircularJSON from 'circular-json';
+import axios from 'axios';
+import Cookie from './Cookie';
 import {
   setComponentIds,
   setComponentRemoteUnSelected,
@@ -29,6 +31,7 @@ export var queue = [];
 export var isConnected = false;
 var sessionId = '';
 var setQueue;
+var url;
 export const ClientStateEnum = {
   Synced: 1,
   AwaitingACK: 2,
@@ -54,17 +57,15 @@ var initBuffer = new Array();
 var topic = null;
 var privateMsg = null;
 
-export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQueue) => {
+export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQueue, tempUrl) => {
   //username = makeId(5);
   email = tempEmail;
   noteId = tempNoteId;
   username = tempUsername;
   setQueue = tempSetQueue;
-  console.log('Email:', email);
-  console.log('username:', username);
-  console.log('NoteId:', noteId);
+  url = tempUrl;
   if (!stompClient) {
-    let socket = new SockJS('http://localhost:8080/websocket');
+    let socket = new SockJS(`${url}websocket`);
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected, onError);
   } else {
@@ -120,7 +121,6 @@ const onError = () => {
 
 const onMessageReceived = async payload => {
   let StoC_msg = CircularJSON.parse(payload.body);
-  console.log(StoC_msg.senderEmail + '  v.s. ' + email);
   if (StoC_msg.type === 'JOIN') {
     if (StoC_msg.senderEmail === email) {
       sessionId = StoC_msg.sessionId;
@@ -137,9 +137,10 @@ const onMessageReceived = async payload => {
     }
     // join msg of other clients
     else {
-      console.log('someone join!!', StoC_msg.senderEmail);
       // Todo: get and set the queue
       let queueStr = StoC_msg.queue;
+      const cookieParser = new Cookie(document.cookie);
+      const saveUrl = `${url}note/saveTempCollaborationNote/`;
       queue = queueStr.split(' ');
       setQueue(queue);
       if (queue[0] == email) {
@@ -152,27 +153,37 @@ const onMessageReceived = async payload => {
         let id = wrapper.get('attributes').id;
         let op = {
           action: 'copy-wrapper',
-          opts: {
-            components: components,
-            style: style,
-            id: id,
-          },
         };
-        let CtoS_Msg = {
-          senderName: username,
-          senderEmail: email,
-          sessionId: sessionId,
-          type: 'COPY',
-          ts: localTS,
-          op: CircularJSON.stringify(op),
-          newcomer: StoC_msg.senderEmail,
-          noteId: noteId,
+        let dataStored = {
+          components: components,
+          style: style,
+          id: id,
         };
-        //stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
-        stompClient.send(`/app/chat.send/${noteId}`, {}, CircularJSON.stringify(CtoS_Msg));
 
-        console.log('send copy!');
-        console.log('state: ' + ClientState);
+        axios
+          .put(saveUrl + `${noteId}`, dataStored, {
+            headers: {
+              Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+            },
+          })
+          .then(res => {
+            let CtoS_Msg = {
+              senderName: username,
+              senderEmail: email,
+              sessionId: sessionId,
+              type: 'COPY',
+              ts: localTS,
+              op: CircularJSON.stringify(op),
+              newcomer: StoC_msg.senderEmail,
+              noteId: noteId,
+            };
+            //stompClient.send('/app/chat.send', {}, CircularJSON.stringify(CtoS_Msg));
+            stompClient.send(`/app/chat.send/${noteId}`, {}, CircularJSON.stringify(CtoS_Msg));
+            console.log('state: ' + ClientState);
+          })
+          .catch(err => {
+            console.log('error!!!!', err);
+          });
       }
     }
   } else if (StoC_msg.type === 'COPY') {
@@ -180,30 +191,40 @@ const onMessageReceived = async payload => {
     if (ClientState == ClientStateEnum.EditorInitializing) {
       let remoteOp = CircularJSON.parse(StoC_msg.op);
       let remoteTS = StoC_msg.ts;
+      const cookieParser = new Cookie(document.cookie);
+      const loadUrl = `${url}note/loadTempCollaborationNote/`;
       localTS = remoteTS;
       if (remoteOp.action == 'copy-wrapper') {
-        let opts = remoteOp.opts;
-        let wrapper = myEditor.getWrapper();
+        axios
+          .get(loadUrl + `${noteId}`, {
+            headers: {
+              Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
+            },
+          })
+          .then(res => {
+            let opts = res.data.res;
+            let wrapper = myEditor.getWrapper();
+            // init the editor
+            wrapper.set('attributes', { id: opts.id });
+            myEditor.setComponents(opts.components);
+            myEditor.setStyle(opts.style);
 
-        // init the editor
-        wrapper.set('attributes', { id: opts.id });
-        myEditor.setComponents(opts.components);
-        myEditor.setStyle(opts.style);
-        console.log('-----opts------:', opts);
-
-        while (initBuffer.length != 0) {
-          let msg = initBuffer.shift();
-          console.log('msg.ts localTS' + msg.ts + '-' + localTS);
-          if (msg.ts > localTS) {
-            remoteOp = CircularJSON.parse(msg.op);
-            applyOp(remoteOp.action, remoteOp.opts);
-          }
-        }
-        let components = myEditor.getComponents();
-        setComponentRemoteSelected(components);
-        // set state to Synced
-        ClientState = ClientStateEnum.Synced;
-        console.log('state: Synced');
+            while (initBuffer.length != 0) {
+              let msg = initBuffer.shift();
+              if (msg.ts > localTS) {
+                remoteOp = CircularJSON.parse(msg.op);
+                applyOp(remoteOp.action, remoteOp.opts);
+              }
+            }
+            let components = myEditor.getComponents();
+            setComponentRemoteSelected(components);
+            // set state to Synced
+            ClientState = ClientStateEnum.Synced;
+            console.log('state: Synced');
+          })
+          .catch(err => {
+            console.log('error!!!!', err);
+          });
       }
     }
   } else if (StoC_msg.type === 'LEAVE') {
@@ -239,7 +260,6 @@ const onMessageReceived = async payload => {
       }
     }
   } else if (StoC_msg.type === 'OP') {
-    console.log('ClientState: ' + ClientState);
     //--------------------------- State: Synced -----------------------------
     if (ClientState == ClientStateEnum.Synced) {
       /***** ApplyRemoteOp *****/
@@ -263,7 +283,6 @@ const onMessageReceived = async payload => {
     }
     //-------------------------- State: EditorInitializing ------------------------------
     else if (ClientState == ClientStateEnum.EditorInitializing) {
-      console.log('push to initBuffer!');
       initBuffer.push(StoC_msg);
     }
     //-------------------------- State: Others ------------------------------
@@ -281,20 +300,16 @@ const onMessageReceived = async payload => {
 };
 
 const applyOp = (action, opts) => {
-  console.log('action:', action);
   const droppable = myEditor.getModel().getCurrentFrame().droppable;
   if (action === 'delete-component') {
     applyDeleteComponent(myEditor.getModel().getEditor(), opts);
   } else if (action === 'add-component') {
     if (!opts.dropContent) return;
-    console.log('valid op!');
     droppable.applyAppendOrMoveComponent(opts, 'add-component');
     let components = myEditor.getComponents();
     setComponentIds(components);
-    //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'move-component') {
     droppable.applyAppendOrMoveComponent(opts, 'move-component');
-    //sorter.move(opts.dst, opts.src, opts.pos, opts, 0);
   } else if (action === 'select-component') {
     applyAddSelected(opts);
   } else if (action === 'unselect-component') {
@@ -319,7 +334,6 @@ export const setState = state => {
 // finish
 export const SendingOpToController = () => {
   // send Op to controller
-  console.log('Send!!!!!!!!!!!!!!!!!!!!!!!!!');
   let CtoS_Msg = {
     senderName: username,
     senderEmail: email,

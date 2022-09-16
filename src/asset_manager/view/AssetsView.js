@@ -1,4 +1,11 @@
 import Backbone from 'backbone';
+import {
+  ClientState,
+  ClientStateEnum,
+  setState,
+  ApplyingLocalOp,
+  ApplyingBufferedLocalOp,
+} from '../../utils/WebSocket';
 
 export default Backbone.View.extend({
   events: {
@@ -133,6 +140,9 @@ export default Backbone.View.extend({
    * @private
    * */
   addAsset(model, fragmentEl = null) {
+    const url = model.attributes.src;
+    const id = this.collection.target.ccid;
+
     const fragment = fragmentEl;
     const collection = this.collection;
     const config = this.config;
@@ -149,6 +159,26 @@ export default Backbone.View.extend({
       if (assetsEl) {
         assetsEl.insertBefore(rendered, assetsEl.firstChild);
       }
+    }
+
+    let op = {};
+    let opOpts = {
+      src: url,
+      id: id,
+    };
+    op.opts = opOpts;
+    op.action = 'set-image-src';
+
+    if (ClientState == ClientStateEnum.Synced) {
+      // set state to ApplyingLocalOp
+      setState(ClientStateEnum.ApplyingLocalOp);
+      // increase localTS and set localOp
+      ApplyingLocalOp(op);
+    } else if (ClientState == ClientStateEnum.AwaitingACK || ClientState == ClientStateEnum.AwaitingWithBuffer) {
+      // set state to ApplyingBufferedLocalOp
+      setState(ClientStateEnum.ApplyingBufferedLocalOp);
+      // push the op to buffer
+      ApplyingBufferedLocalOp(op);
     }
 
     return rendered;
