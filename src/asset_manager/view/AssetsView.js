@@ -6,6 +6,7 @@ import {
   ApplyingLocalOp,
   ApplyingBufferedLocalOp,
 } from '../../utils/WebSocket';
+import { message } from 'antd';
 
 export default Backbone.View.extend({
   events: {
@@ -63,6 +64,8 @@ export default Backbone.View.extend({
     } else {
       this.options.globalCollection.add(url, { at: 0 });
     }
+    message.destroy();
+    message.success('Success!');
   },
   /**
    * Add new asset to the collection via string

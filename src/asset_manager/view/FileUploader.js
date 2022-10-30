@@ -3,6 +3,7 @@ import fetch from 'utils/fetch';
 import html from 'utils/html';
 import axios from 'axios';
 import Cookie from '../../utils/Cookie';
+import { message } from 'antd';
 
 export default Backbone.View.extend(
   {
@@ -315,7 +316,7 @@ export default Backbone.View.extend(
           var fileURL = URL.createObjectURL(file)
           videoNode.src = fileURL
            */
-
+            message.info('Image uploading...', 0);
             // If it's an image, try to find its size
             axios
               .put(
@@ -333,6 +334,8 @@ export default Backbone.View.extend(
               })
               .catch(err => {
                 console.log(err);
+                message.destroy();
+                message.error('Error!');
               });
             /*if (type === 'image') {
               const data = {

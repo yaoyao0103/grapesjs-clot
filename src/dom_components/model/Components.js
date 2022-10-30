@@ -38,7 +38,7 @@ export const setComponentRemoteUnSelected = (cmp, username) => {
       cmp.set('status', '');
       cmp.set('chooser', '');
     }
-    setComponentRemoteUnSelected(cmp.components().models);
+    setComponentRemoteUnSelected(cmp.components().models, username);
   });
 };
 

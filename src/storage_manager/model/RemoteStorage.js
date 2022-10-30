@@ -105,9 +105,6 @@ export default Backbone.Model.extend({
     if (method == 'get') {
       this.fetch(url, {
         method: method,
-        headers: {
-          Authorization: 'Bearer ' + cookieParser.getCookieByName('token'),
-        },
       })
         .then(res => (((res.status / 200) | 0) == 1 ? res.text() : res.text().then(text => Promise.reject(text))))
         .then(version => {

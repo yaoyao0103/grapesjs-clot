@@ -64,6 +64,8 @@ export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQue
   username = tempUsername;
   setQueue = tempSetQueue;
   url = tempUrl;
+  ClientState = ClientStateEnum.EditorInitializing;
+  localTS = 0;
   if (!stompClient) {
     let socket = new SockJS(`${url}websocket`);
     stompClient = Stomp.over(socket);
@@ -81,8 +83,6 @@ export const connectWebSocket = (tempNoteId, tempEmail, tempUsername, tempSetQue
 };
 
 const onConnected = () => {
-  ClientState = ClientStateEnum.EditorInitializing;
-  localTS = 0;
   // Subscribe to the Public Topic
   //stompClient.subscribe('/topic/public', onMessageReceived);
   // Todo
@@ -188,6 +188,7 @@ const onMessageReceived = async payload => {
     }
   } else if (StoC_msg.type === 'COPY') {
     // handle it only when the state is EditorInitializing (newly client)
+
     if (ClientState == ClientStateEnum.EditorInitializing) {
       let remoteOp = CircularJSON.parse(StoC_msg.op);
       let remoteTS = StoC_msg.ts;
@@ -205,6 +206,7 @@ const onMessageReceived = async payload => {
             let opts = res.data.res;
             let wrapper = myEditor.getWrapper();
             // init the editor
+
             wrapper.set('attributes', { id: opts.id });
             myEditor.setComponents(opts.components);
             myEditor.setStyle(opts.style);
